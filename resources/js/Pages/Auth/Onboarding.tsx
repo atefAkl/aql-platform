@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Head, useForm, Link } from '@inertiajs/react';
 import { Building2, ShieldCheck, User, Mail, Lock, Eye, EyeOff, Sun, Moon, ArrowRight, Loader2 } from 'lucide-react';
 
-export default function Onboarding() {
+export default function Onboarding({ central_domain }: { central_domain: string }) {
     const [darkMode, setDarkMode] = useState<boolean>(() => {
         return localStorage.getItem('theme') === 'dark';
     });
@@ -129,7 +129,7 @@ export default function Onboarding() {
                                     />
                                     {data.slug && (
                                         <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-mono" dir="ltr">
-                                            النطاق: <span className="text-blue-600 dark:text-blue-400 font-semibold">{data.slug}.localhost</span>
+                                            النطاق: <span className="text-blue-600 dark:text-blue-400 font-semibold">{data.slug}.{central_domain}</span>
                                         </p>
                                     )}
                                     {errors.slug && <p className="text-xs text-rose-500 mt-1">{errors.slug}</p>}
@@ -180,50 +180,6 @@ export default function Onboarding() {
                                         />
                                     </div>
                                     {errors.admin_email && <p className="text-xs text-rose-500 mt-1">{errors.admin_email}</p>}
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                                        كلمة المرور <span className="text-rose-500">*</span>
-                                    </label>
-                                    <div className="relative">
-                                        <Lock className="w-4 h-4 text-slate-400 absolute right-3 top-3" />
-                                        <input
-                                            type={showPassword ? 'text' : 'password'}
-                                            required
-                                            value={data.password}
-                                            onChange={(e) => setData('password', e.target.value)}
-                                            placeholder="••••••••"
-                                            className="w-full pr-9 pl-10 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute left-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                                        >
-                                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                        </button>
-                                    </div>
-                                    {errors.password && <p className="text-xs text-rose-500 mt-1">{errors.password}</p>}
-                                </div>
-
-                                <div>
-                                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-                                        تأكيد كلمة المرور <span className="text-rose-500">*</span>
-                                    </label>
-                                    <div className="relative">
-                                        <Lock className="w-4 h-4 text-slate-400 absolute right-3 top-3" />
-                                        <input
-                                            type={showPassword ? 'text' : 'password'}
-                                            required
-                                            value={data.password_confirmation}
-                                            onChange={(e) => setData('password_confirmation', e.target.value)}
-                                            placeholder="••••••••"
-                                            className="w-full pr-9 pl-3.5 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        />
-                                    </div>
                                 </div>
                             </div>
                         </div>

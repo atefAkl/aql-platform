@@ -24,7 +24,10 @@ class OnboardingController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('Auth/Onboarding');
+        $centralDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
+        return Inertia::render('Auth/Onboarding', [
+            'central_domain' => $centralDomain,
+        ]);
     }
 
     /**
@@ -52,7 +55,6 @@ class OnboardingController extends Controller
             ],
             'admin_name' => ['required', 'string', 'max:255'],
             'admin_email' => ['required', 'string', 'email', 'max:255'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ], [
             'organization_name.required' => 'يرجى كتابة اسم المؤسسة.',
             'slug.required' => 'يرجى كتابة المعرف الفريد للمؤسسة (Slug).',
@@ -60,14 +62,12 @@ class OnboardingController extends Controller
             'admin_name.required' => 'يرجى إدخال اسم مسؤول النظام.',
             'admin_email.required' => 'يرجى إدخال البريد الإلكتروني للمسؤول.',
             'admin_email.email' => 'صيغة البريد الإلكتروني غير صحيحة.',
-            'password.required' => 'يرجى إدخال كلمة المرور.',
-            'password.min' => 'كلمة المرور يجب أن لا تقل عن 8 أحرف.',
-            'password.confirmed' => 'تأكيد كلمة المرور غير مطابق.',
         ]);
 
 
         $slug = Str::slug($validated['slug']);
-        $domainName = $slug . '.localhost';
+        $centralDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
+        $domainName = $slug . '.' . $centralDomain;
 
         // Additional uniqueness check for domain mapping
         if (Domain::where('domain', $domainName)->exists()) {
@@ -77,12 +77,13 @@ class OnboardingController extends Controller
         }
 
         try {
+            $randomPassword = Str::random(16);
             $result = $provisioningService->createTenant(
                 $slug,
                 $validated['organization_name'],
                 $validated['admin_name'],
                 $validated['admin_email'],
-                $validated['password'],
+                $randomPassword,
                 $domainName
             );
 
