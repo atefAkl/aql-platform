@@ -60,12 +60,9 @@ class HandleInertiaRequests extends Middleware
                     'id' => tenant('id'),
                     'name' => tenant('name'),
                     'status' => tenant('status'),
-                ] : [
-                    'id' => 'acme',
-                    'name' => 'شركة الأفق العالمية',
-                    'status' => 'active',
-                ];
+                ] : null;
             },
+
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),

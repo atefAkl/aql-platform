@@ -9,6 +9,8 @@ use App\Models\AuditLog;
 use Inertia\Inertia;
 use Inertia\Response;
 
+use Illuminate\Support\Facades\Gate;
+
 class AuditLogController extends Controller
 {
     /**
@@ -16,7 +18,10 @@ class AuditLogController extends Controller
      */
     public function index(): Response
     {
+        Gate::authorize('audit.view');
+
         $auditLogs = AuditLog::orderBy('id', 'desc')->paginate(20);
+
 
         return Inertia::render('Audit/Index', [
             'auditLogs' => $auditLogs,

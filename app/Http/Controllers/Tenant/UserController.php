@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
 
+use Illuminate\Support\Facades\Gate;
+
 class UserController extends Controller
 {
     /**
@@ -21,6 +23,8 @@ class UserController extends Controller
      */
     public function index(): Response
     {
+        Gate::authorize('users.view');
+
         $users = User::with(['role', 'permissions'])->orderBy('id', 'desc')->get();
         $roles = Role::with('permissions')->get();
         $permissions = Permission::all()->groupBy('module');
@@ -37,12 +41,15 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        Gate::authorize('users.create');
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8'],
             'role_id' => ['nullable', 'exists:roles,id'],
         ]);
+
 
         $role = $validated['role_id'] ? Role::find($validated['role_id']) : null;
 
@@ -75,7 +82,10 @@ class UserController extends Controller
      */
     public function updatePermissions(Request $request, User $user)
     {
+        Gate::authorize('users.permissions');
+
         $validated = $request->validate([
+
             'role_id' => ['nullable', 'exists:roles,id'],
             'permission_ids' => ['array'],
             'permission_ids.*' => ['exists:permissions,id'],

@@ -20,18 +20,10 @@ class EnsureTenantInitialized
                 if ($tenant) {
                     tenancy()->initialize($tenant);
                 }
-            } else {
-                // Default to first active tenant for tenant database context
-                $firstTenant = Tenant::where('status', 'active')->first();
-                if ($firstTenant) {
-                    tenancy()->initialize($firstTenant);
-                    if ($request->hasSession()) {
-                        $request->session()->put('tenant_id', $firstTenant->id);
-                    }
-                }
             }
         }
 
         return $next($request);
     }
 }
+

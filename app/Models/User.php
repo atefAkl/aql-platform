@@ -46,7 +46,15 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user has permission directly OR via their Role template (ADR-003 & ADR-005).
+     * Check if user has permission directly OR via their Role template (ADR-003, ADR-005, Contract Section 13).
+     */
+    public function hasPermission(string $code): bool
+    {
+        return $this->hasDirectPermission($code);
+    }
+
+    /**
+     * Check direct or role permission.
      */
     public function hasDirectPermission(string $code): bool
     {
@@ -63,3 +71,4 @@ class User extends Authenticatable
         return false;
     }
 }
+

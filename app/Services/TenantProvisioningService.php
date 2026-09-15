@@ -32,8 +32,9 @@ class TenantProvisioningService
         ]);
 
         // 3. Initialize Tenancy Context & Seed Initial Database Data inside Tenant DB
-        $tenant->run(function () use ($adminName, $adminEmail, $adminPassword) {
+        $tenant->run(function () use ($tenant, $adminName, $adminEmail, $adminPassword) {
             // Seed Atomic Permissions Catalog
+
             $permissionsData = [
                 ['code' => 'expenses.view', 'name' => 'عرض المصروفات', 'module' => 'expenses'],
                 ['code' => 'expenses.create', 'name' => 'إضافة مصروف جديد', 'module' => 'expenses'],
@@ -99,9 +100,10 @@ class TenantProvisioningService
                 'Tenant',
                 $adminUser->id . '',
                 "تم تجهيز ونشر قاعدة بيانات المستأجر بنجاح وتوليد قوالب الأدوار وحساب الأدمن الرئيسي: {$adminEmail}",
-                ['tenant_id' => $adminUser->id]
+                ['tenant_id' => $tenant->id]
             );
         });
+
 
         return $tenant;
     }

@@ -13,6 +13,8 @@
 | **ADR-003** | نظام المصادقة المزدوج والصلاحيات المباشرة (Dual Auth Model & Direct Permissions) | 🟢 معتمد (Accepted) | 2026-09-15 |
 | **ADR-004** | نطاق الإصدار التجريبي الأول وخطة الطريق (MVP Scope & Sprint Roadmap) | 🟢 معتمد (Accepted) | 2026-09-15 |
 | **ADR-005** | المظهر ثنائي الوضعية، الأدوار الهجينة، والتوستس (Theme Toggle, Hybrid Roles & Toasts) | 🟢 معتمد (Accepted) | 2026-09-15 |
+| **ADR-006** | حوكمة السلطة المعمارية وتوزيع المسؤوليات (Agent Authority & Architectural Governance) | 🟢 معتمد (Accepted) | 2026-09-15 |
+
 
 ---
 
@@ -143,4 +145,38 @@
 3. **رسائل التنبيهات والـ Toasts (Toast Notification System):**
    - استبدال التنبيهات المباشرة بنظام **Toast Notifications** تفاعلي، يظهر في الزاوية العلوية اليسرى (`top-4 left-4`) وهي الجهة المقابلة للشريط الجانبي الأيمن في التنسيق العربي (RTL).
    - توفير درجات التنبيه الأربعة: النجاح (Success - Emerald)، الخطأ (Error - Red)، التحذير (Warning - Amber)، والمعلومات (Info - Blue) مع مؤقت اختفاء آلي وزر إغلاق سريع.
+
+---
+
+## ADR-006: حوكمة السلطة المعمارية وتوزيع المسؤوليات (Agent Authority & Architectural Governance)
+
+* **الحالة:** 🟢 معتمد ومصادق عليه (Accepted / Approved)
+* **التاريخ:** 2026-09-15
+* **المحررين:** Product Owner & Lead Developer
+
+### 1. السياق والمشكلة (Context & Problem Statement)
+
+نحتاج إلى حسم وتحديد حدود السلطات بين **صاحب المنتج والقيادة التقنية (Product Owner / Lead Developer)** و**وكيل التنفيذ الآلي (Antigravity Implementation Agent)** لتجنب أي تغييرات معمارية غير مصرح بها أو اجتهادات فردية في القرارات التأسيسية للمشروع.
+
+---
+
+### 2. القرار النهائي المصادق عليه (Final Decision & Approval)
+
+1. **تحديد المسؤوليات والـ Role Boundary:**
+   - **Antigravity Implementation Agent:** مسكول حصراً عن **التنفيذ والتطوير والتأكد من الجودة وإجراء الاختبارات المؤتمتة (Implementation, Testing, Verification & Code Quality)** وفقاً للمواصفات والقرارات المعمارية المعتمدة.
+   - **Product Owner / Lead Developer:** هو الجهة الوحيدة المبتة والمخولة بإصدار، تعديل، أو اعتماد القرارات المعمارية (`Architecture Decision Records - ADR`).
+2. **التدرج الهرمي للسلطة (Authority Hierarchy):**
+   1. سجل القرارات المعمارية المعتمدة (`ARCHITECTURE_DECISIONS.md`).
+   2. وثيقة المعمارية الرئيسية (`architecture.md`).
+   3. عقد المواصفات وقبول السبرنت (`SPRINT1_ACCEPTANCE_CONTRACT.md`).
+   4. المعايير والعقود البرمجية في الكود القائم.
+   5. تفاصيل التنفيذ الاختيارية التي يحددها Antigravity.
+3. **حظر التعديل الضمني (No Silent Architecture Override):**
+   - يُحظر على Antigravity إعادة تفسير أو تجاوز أي قرار معماري معتمد.
+   - في حال وجود أي تعارض أو فجوة توثيقية (`Specification Gap`)، يجب على Antigravity:
+     * التوقف عن تنفيذ الجزئية المتعارة.
+     * التبليغ الفوري وشرح التعارض.
+     * تقديم الخيارات والتوصيات.
+     * الانتظار لحين صدور قرار صريح من Product Owner / Lead Developer.
+
 
