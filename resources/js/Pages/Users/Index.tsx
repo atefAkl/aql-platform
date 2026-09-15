@@ -2,41 +2,61 @@ import React, { useState } from 'react';
 import PlatformLayout from '../../Layouts/PlatformLayout';
 import { useForm, router } from '@inertiajs/react';
 import { Users, UserPlus, Shield, Check, Save, UserCheck, Briefcase } from 'lucide-react';
+import { User as UserType } from '../../types';
 
-export default function UsersIndex({ users, roles, permissions }) {
-    const [selectedUser, setSelectedUser] = useState(users[0] || null);
-    const [selectedRoleId, setSelectedRoleId] = useState(
-        selectedUser ? selectedUser.role_id : null
+interface RoleType {
+    id: number;
+    name: string;
+    description: string;
+    permissions?: Array<{ id: number; code: string }>;
+}
+
+interface PermissionType {
+    id: number;
+    code: string;
+    name: string;
+    module: string;
+}
+
+interface UsersIndexProps {
+    users: Array<UserType & { permissions: PermissionType[]; role_id?: number; role?: RoleType }>;
+    roles: RoleType[];
+    permissions: Record<string, PermissionType[]>;
+}
+
+export default function UsersIndex({ users, roles, permissions }: UsersIndexProps) {
+    const [selectedUser, setSelectedUser] = useState<UsersIndexProps['users'][0] | null>(users[0] || null);
+    const [selectedRoleId, setSelectedRoleId] = useState<number | string | null>(
+        selectedUser ? selectedUser.role_id || null : null
     );
-    const [selectedPermIds, setSelectedPermIds] = useState(
+    const [selectedPermIds, setSelectedPermIds] = useState<number[]>(
         selectedUser ? selectedUser.permissions.map((p) => p.id) : []
     );
-    const [showAddModal, setShowAddModal] = useState(false);
+    const [showAddModal, setShowAddModal] = useState<boolean>(false);
 
     const { data: newUser, setData: setNewUser, post, reset, processing, errors } = useForm({
         name: '',
         email: '',
         password: '',
-        role_id: roles[0]?.id || '',
+        role_id: roles[0]?.id ? String(roles[0].id) : '',
     });
 
-    const handleSelectUser = (u) => {
+    const handleSelectUser = (u: UsersIndexProps['users'][0]) => {
         setSelectedUser(u);
-        setSelectedRoleId(u.role_id);
+        setSelectedRoleId(u.role_id || null);
         setSelectedPermIds(u.permissions.map((p) => p.id));
     };
 
-    const handleRoleChange = (roleId) => {
+    const handleRoleChange = (roleId: string) => {
         setSelectedRoleId(roleId);
         const targetRole = roles.find((r) => r.id === parseInt(roleId));
         if (targetRole && targetRole.permissions) {
-            // Pre-select role permissions template
             const rolePermIds = targetRole.permissions.map((p) => p.id);
             setSelectedPermIds(rolePermIds);
         }
     };
 
-    const togglePermission = (permId) => {
+    const togglePermission = (permId: number) => {
         if (selectedPermIds.includes(permId)) {
             setSelectedPermIds(selectedPermIds.filter((id) => id !== permId));
         } else {
@@ -52,7 +72,7 @@ export default function UsersIndex({ users, roles, permissions }) {
         });
     };
 
-    const handleCreateUser = (e) => {
+    const handleCreateUser = (e: React.FormEvent) => {
         e.preventDefault();
         post('/users', {
             onSuccess: () => {

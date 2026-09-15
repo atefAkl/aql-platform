@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { useForm } from '@inertiajs/react';
+import { useForm, Link } from '@inertiajs/react';
 import { Lock, Mail, Building2, KeyRound, Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
-    const [showPassword, setShowPassword] = useState(false);
+    const [showPassword, setShowPassword] = useState<boolean>(false);
 
     const { data, setData, post, processing, errors } = useForm({
         email: '',
@@ -11,7 +11,7 @@ export default function Login() {
         remember: true,
     });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         post('/login');
     };
@@ -88,9 +88,9 @@ export default function Login() {
                 <div className="pt-4 border-t border-slate-800/80 text-center space-y-2">
                     <p className="text-xs text-slate-400">
                         ليس لديك مؤسسة مسجلة؟{' '}
-                        <a href="/onboarding" className="text-emerald-400 font-semibold hover:underline">
+                        <Link href="/onboarding" className="text-emerald-400 font-semibold hover:underline">
                             سجل مؤسستك الآن
-                        </a>
+                        </Link>
                     </p>
                     <span className="text-[10px] text-slate-500 block">PostgreSQL Multi-Tenant Context Active</span>
                 </div>
@@ -98,4 +98,3 @@ export default function Login() {
         </div>
     );
 }
-

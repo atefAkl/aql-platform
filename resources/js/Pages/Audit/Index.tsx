@@ -1,8 +1,26 @@
 import React from 'react';
 import PlatformLayout from '../../Layouts/PlatformLayout';
-import { ClipboardList, ShieldAlert, History } from 'lucide-react';
+import { ClipboardList } from 'lucide-react';
 
-export default function AuditIndex({ auditLogs }) {
+interface AuditLogItem {
+    id: number;
+    user_id?: number | string;
+    user_name?: string;
+    action: string;
+    entity_type: string;
+    entity_id?: string;
+    description: string;
+    ip_address?: string;
+    created_at: string;
+}
+
+interface AuditIndexProps {
+    auditLogs: {
+        data: AuditLogItem[];
+    };
+}
+
+export default function AuditIndex({ auditLogs }: AuditIndexProps) {
     return (
         <PlatformLayout title="سجل العمليات الحساسة">
             <div className="space-y-6">
@@ -31,7 +49,7 @@ export default function AuditIndex({ auditLogs }) {
                                 <th className="p-3.5">عنوان IP</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-800/60">
+                        <tbody className="divide-y divide-slate-800/60">
                             {auditLogs?.data && auditLogs.data.length > 0 ? (
                                 auditLogs.data.map((log) => (
                                     <tr key={log.id} className="hover:bg-slate-800/40 transition-colors">
@@ -59,7 +77,7 @@ export default function AuditIndex({ auditLogs }) {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="6" className="text-center py-8 text-slate-500 text-xs">
+                                    <td colSpan={6} className="text-center py-8 text-slate-500 text-xs">
                                         لا توجد حركات مسجلة حالياً في سجل الأمان.
                                     </td>
                                 </tr>

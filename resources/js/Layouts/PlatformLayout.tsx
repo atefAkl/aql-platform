@@ -1,12 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ReactNode } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { Building2, Users, ClipboardList, LogOut, CheckCircle, AlertCircle, AlertTriangle, Info, Sun, Moon, X } from 'lucide-react';
+import { PageProps } from '../types';
 
-export default function PlatformLayout({ children, title }) {
-    const { auth, tenant, flash } = usePage().props;
+interface PlatformLayoutProps {
+    children: ReactNode;
+    title?: string;
+}
+
+interface ToastState {
+    type: 'success' | 'error' | 'warning' | 'info';
+    message: string;
+}
+
+export default function PlatformLayout({ children }: PlatformLayoutProps) {
+    const { auth, tenant, flash } = usePage<PageProps>().props;
 
     // Theme Mode State (ADR-005)
-    const [darkMode, setDarkMode] = useState(() => {
+    const [darkMode, setDarkMode] = useState<boolean>(() => {
         if (typeof window !== 'undefined') {
             return localStorage.getItem('theme') !== 'light';
         }
@@ -14,7 +25,7 @@ export default function PlatformLayout({ children, title }) {
     });
 
     // Toast State
-    const [toast, setToast] = useState(null);
+    const [toast, setToast] = useState<ToastState | null>(null);
 
     useEffect(() => {
         if (darkMode) {
@@ -32,8 +43,6 @@ export default function PlatformLayout({ children, title }) {
             setToast({ type: 'success', message: flash.success });
         } else if (flash?.error) {
             setToast({ type: 'error', message: flash.error });
-        } else if (flash?.warning) {
-            setToast({ type: 'warning', message: flash.warning });
         }
     }, [flash]);
 
@@ -81,8 +90,8 @@ export default function PlatformLayout({ children, title }) {
                                 <Building2 className="w-5 h-5" />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">{tenant?.name || 'شركة الأفق العالمية'}</h4>
-                                <span className="text-xs text-slate-500 dark:text-slate-400 block truncate">{tenant?.id || 'acme'}.platform.com</span>
+                                <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">{tenant?.name || 'مؤسستك الشخصية'}</h4>
+                                <span className="text-xs text-slate-500 dark:text-slate-400 block truncate">{tenant?.id || 'tenant'}.platform.com</span>
                             </div>
                             <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium border border-emerald-500/20">
                                 PostgreSQL
