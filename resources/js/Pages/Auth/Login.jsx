@@ -85,10 +85,17 @@ export default function Login() {
                     </button>
                 </form>
 
-                <div className="pt-4 border-t border-slate-800/80 text-center">
-                    <span className="text-[10px] text-slate-500">PostgreSQL Multi-Tenant Context Active</span>
+                <div className="pt-4 border-t border-slate-800/80 text-center space-y-2">
+                    <p className="text-xs text-slate-400">
+                        ليس لديك مؤسسة مسجلة؟{' '}
+                        <a href="/onboarding" className="text-emerald-400 font-semibold hover:underline">
+                            سجل مؤسستك الآن
+                        </a>
+                    </p>
+                    <span className="text-[10px] text-slate-500 block">PostgreSQL Multi-Tenant Context Active</span>
                 </div>
             </div>
         </div>
     );
 }
+

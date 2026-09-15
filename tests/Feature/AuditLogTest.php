@@ -21,14 +21,16 @@ class AuditLogTest extends TestCase
 
         $service = new TenantProvisioningService();
         $this->tenantId = 'auditsuite' . rand(1000, 9999);
-        $this->tenant = $service->createTenant(
+        $res = $service->createTenant(
             $this->tenantId,
             'شركة السجل والتدقيق',
             'مدير تدقيق الأمان',
             "admin@{$this->tenantId}.com",
             'password123'
         );
+        $this->tenant = $res['tenant'];
     }
+
 
     protected function tearDown(): void
     {

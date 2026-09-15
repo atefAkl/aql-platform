@@ -15,23 +15,26 @@ class TenantIsolationTest extends TestCase
 
         // 1. Create Tenant A
         $idA = 'tenant-a-' . rand(100, 999);
-        $tenantA = $service->createTenant(
+        $resA = $service->createTenant(
             $idA,
             'Tenant A Corporation',
             'Admin Tenant A',
             "admin@{$idA}.com",
             'password123'
         );
+        $tenantA = $resA['tenant'];
 
         // 2. Create Tenant B
         $idB = 'tenant-b-' . rand(100, 999);
-        $tenantB = $service->createTenant(
+        $resB = $service->createTenant(
             $idB,
             'Tenant B Corporation',
             'Admin Tenant B',
             "admin@{$idB}.com",
             'password123'
         );
+        $tenantB = $resB['tenant'];
+
 
         // 3. Add extra user in Tenant A
         $tenantA->run(function () use ($idA) {

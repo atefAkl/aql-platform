@@ -20,14 +20,16 @@ class AuthorizationTest extends TestCase
 
         $service = new TenantProvisioningService();
         $this->tenantId = 'authzsuite' . rand(1000, 9999);
-        $this->tenant = $service->createTenant(
+        $res = $service->createTenant(
             $this->tenantId,
             'شركة التحكم بالصلاحيات',
             'مدير الصلاحيات',
             "admin@{$this->tenantId}.com",
             'password123'
         );
+        $this->tenant = $res['tenant'];
     }
+
 
     protected function tearDown(): void
     {

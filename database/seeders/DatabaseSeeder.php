@@ -2,24 +2,30 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Tenant;
+use App\Services\TenantProvisioningService;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
-     * Seed the application's database.
+     * Seed the application's database with initial demo tenant if not present.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $tenantId = 'acme';
+        $existing = Tenant::find($tenantId);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        if (! $existing) {
+            $service = new TenantProvisioningService();
+            $service->createTenant(
+                $tenantId,
+                'شركة الأفق العالمية',
+                'الأدمن الرئيسي',
+                'admin@acme.com',
+                'password123',
+                'acme.localhost'
+            );
+        }
     }
 }

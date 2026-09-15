@@ -16,13 +16,15 @@ class TenantProvisioningTest extends TestCase
         $service = new TenantProvisioningService();
 
         $tenantId = 'provcorp' . rand(1000, 9999);
-        $tenant = $service->createTenant(
+        $res = $service->createTenant(
             $tenantId,
             'شركة النشر والتهيئة الكاملة',
             'خالد عبد الرحمن',
             "admin@{$tenantId}.com",
             'password123'
         );
+        $tenant = $res['tenant'];
+
 
         // 1. Verify Landlord Central DB records
         $this->assertDatabaseHas('tenants', [

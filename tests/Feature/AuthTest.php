@@ -19,14 +19,16 @@ class AuthTest extends TestCase
 
         $service = new TenantProvisioningService();
         $this->tenantId = 'authsuite' . rand(1000, 9999);
-        $this->tenant = $service->createTenant(
+        $res = $service->createTenant(
             $this->tenantId,
             'شركة مصادقة الهوية',
             'مدير المصادقة',
             "admin@{$this->tenantId}.com",
             'password123'
         );
+        $this->tenant = $res['tenant'];
     }
+
 
     protected function tearDown(): void
     {
