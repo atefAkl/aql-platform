@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Models\Tenant;
-use App\Models\User;
 use App\Models\Permission;
 use App\Models\Role;
+use App\Models\Tenant;
+use App\Models\User;
 use App\Services\TenantProvisioningService;
 use Tests\TestCase;
 
@@ -13,9 +13,9 @@ class TenantProvisioningTest extends TestCase
 {
     public function test_tenant_creation_database_provisioning_and_seeding()
     {
-        $service = new TenantProvisioningService();
+        $service = new TenantProvisioningService;
 
-        $tenantId = 'provcorp' . rand(1000, 9999);
+        $tenantId = 'provcorp'.rand(1000, 9999);
         $res = $service->createTenant(
             $tenantId,
             'شركة النشر والتهيئة الكاملة',
@@ -25,16 +25,16 @@ class TenantProvisioningTest extends TestCase
         );
         $tenant = $res['tenant'];
 
-
         // 1. Verify Landlord Central DB records
         $this->assertDatabaseHas('tenants', [
             'id' => $tenantId,
             'name' => 'شركة النشر والتهيئة الكاملة',
         ], 'pgsql');
 
+        $centralDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
         $this->assertDatabaseHas('domains', [
             'tenant_id' => $tenantId,
-            'domain' => "{$tenantId}.localhost",
+            'domain' => "{$tenantId}.{$centralDomain}",
         ], 'pgsql');
 
         // 2. Verify Tenant DB context, migrations, admin user, permissions, and roles

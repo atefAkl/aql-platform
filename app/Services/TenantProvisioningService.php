@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\Permission;
+use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
-use App\Models\Role;
-use App\Models\Permission;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -23,7 +23,8 @@ class TenantProvisioningService
     public function createTenant(string $id, string $name, string $adminName, string $adminEmail, string $adminPassword, ?string $domain = null): array
     {
         $tenantId = Str::slug($id);
-        $domainName = $domain ?? $tenantId . '.localhost';
+        $centralDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
+        $domainName = $domain ?? ($tenantId.'.'.$centralDomain);
 
         $tenant = null;
         $adminUser = null;
@@ -107,7 +108,7 @@ class TenantProvisioningService
                 AuditLogService::record(
                     'TENANT_PROVISIONED',
                     'Tenant',
-                    $adminUser->id . '',
+                    $adminUser->id.'',
                     "تم تجهيز ونشر قاعدة بيانات المستأجر بنجاح وتوليد قوالب الأدوار وحساب الأدمن الرئيسي: {$adminEmail}",
                     ['tenant_id' => $tenant->id]
                 );
@@ -118,7 +119,7 @@ class TenantProvisioningService
                 'admin_user' => $adminUser,
             ];
         } catch (\Throwable $e) {
-            Log::error("Tenant provisioning failed for [{$tenantId}]: " . $e->getMessage(), [
+            Log::error("Tenant provisioning failed for [{$tenantId}]: ".$e->getMessage(), [
                 'exception' => $e,
             ]);
 
@@ -131,11 +132,11 @@ class TenantProvisioningService
                     $tenant->domains()->delete();
                     $tenant->delete(); // drops PostgreSQL tenant database if created
                 } catch (\Throwable $cleanupEx) {
-                    Log::error("Compensation cleanup error for [{$tenantId}]: " . $cleanupEx->getMessage());
+                    Log::error("Compensation cleanup error for [{$tenantId}]: ".$cleanupEx->getMessage());
                 }
             }
 
-            throw new \RuntimeException("فشل في تهيئة ونشر بيئة المؤسسة: " . $e->getMessage(), (int) $e->getCode(), $e);
+            throw new \RuntimeException('فشل في تهيئة ونشر بيئة المؤسسة: '.$e->getMessage(), (int) $e->getCode(), $e);
         }
     }
 }
