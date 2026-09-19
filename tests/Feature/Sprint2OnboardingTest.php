@@ -48,7 +48,7 @@ class Sprint2OnboardingTest extends TestCase
 
         $response->assertSessionHasNoErrors();
         $response->assertRedirect('/onboarding');
-        
+
         $this->assertDatabaseHas('registration_requests', [
             'slug' => 'test-corp',
             'status' => 'pending',
@@ -64,7 +64,7 @@ class Sprint2OnboardingTest extends TestCase
      */
     public function test_3_tenant_database_is_provisioned()
     {
-        $service = new TenantProvisioningService();
+        $service = new TenantProvisioningService;
         $result = $service->createTenant(
             'dbprov-test',
             'شركة التهيئة والداول',
@@ -95,7 +95,7 @@ class Sprint2OnboardingTest extends TestCase
      */
     public function test_4_initial_administrator_is_created()
     {
-        $service = new TenantProvisioningService();
+        $service = new TenantProvisioningService;
         $result = $service->createTenant(
             'admin-test',
             'مؤسسة الإدارة الأولى',
@@ -126,7 +126,7 @@ class Sprint2OnboardingTest extends TestCase
      */
     public function test_5_administrator_has_required_permissions()
     {
-        $service = new TenantProvisioningService();
+        $service = new TenantProvisioningService;
         $result = $service->createTenant(
             'perm-test',
             'شركة الصلاحيات الكاملة',
@@ -180,7 +180,7 @@ class Sprint2OnboardingTest extends TestCase
      */
     public function test_7_no_tenant_means_no_arbitrary_tenant_selection()
     {
-        $service = new TenantProvisioningService();
+        $service = new TenantProvisioningService;
         $resA = $service->createTenant('corp-one', 'Corp One', 'Admin 1', 'admin1@one.com', 'Pass123!');
         $resB = $service->createTenant('corp-two', 'Corp Two', 'Admin 2', 'admin2@two.com', 'Pass123!');
         $tenantA = $resA['tenant'];
@@ -194,7 +194,6 @@ class Sprint2OnboardingTest extends TestCase
         $response = $this->get('/');
         $response->assertRedirect('/onboarding');
         $this->assertNull(tenant(), 'System MUST NOT select first active tenant when no tenant context exists.');
-
 
         // Cleanup
         $tenantA->delete();
@@ -233,7 +232,7 @@ class Sprint2OnboardingTest extends TestCase
      */
     public function test_9_failed_provisioning_does_not_report_success()
     {
-        $service = new TenantProvisioningService();
+        $service = new TenantProvisioningService;
 
         // Create initial tenant to trigger duplicate constraint inside provisioning
         Tenant::create(['id' => 'existing-tenant', 'name' => 'Existing', 'status' => 'active']);
@@ -249,13 +248,12 @@ class Sprint2OnboardingTest extends TestCase
         Tenant::find('existing-tenant')?->delete();
     }
 
-
     /**
      * Test 10 — Tenant Isolation (Database Data Isolation & 403 Access Denial)
      */
     public function test_10_tenant_isolation_prevents_cross_access()
     {
-        $service = new TenantProvisioningService();
+        $service = new TenantProvisioningService;
         $resA = $service->createTenant('tenant-iso-a', 'Tenant Iso A', 'Admin A', 'admin@iso-a.com', 'Password123!');
         $resB = $service->createTenant('tenant-iso-b', 'Tenant Iso B', 'Admin B', 'admin@iso-b.com', 'Password123!');
         $tenantA = $resA['tenant'];
@@ -310,7 +308,7 @@ class Sprint2OnboardingTest extends TestCase
      */
     public function test_11_audit_is_created_on_tenant_provisioning()
     {
-        $service = new TenantProvisioningService();
+        $service = new TenantProvisioningService;
         $result = $service->createTenant('audit-prov-test', 'شركة التدقيق الفوري', 'أيمن فؤاد', 'ayman@auditprov.com', 'Password123!');
         $tenant = $result['tenant'];
 
@@ -333,7 +331,7 @@ class Sprint2OnboardingTest extends TestCase
      */
     public function test_12_password_never_appears_in_audit_logs_or_serialized_data()
     {
-        $service = new TenantProvisioningService();
+        $service = new TenantProvisioningService;
         $secretPassword = 'SuperSecretUnseenPassword999!';
         $result = $service->createTenant('secret-audit-test', 'شركة السرية التامة', 'زياد حاتم', 'ziad@secretaudit.com', $secretPassword);
         $tenant = $result['tenant'];
@@ -369,10 +367,10 @@ class Sprint2OnboardingTest extends TestCase
 
         // Platform User authentication context
         $platformAdmin = \App\Models\PlatformUser::factory()->create();
-        
+
         $this->withoutExceptionHandling();
         $response = $this->actingAs($platformAdmin, 'platform')->post('/admin/requests/' . $request->id . '/approve');
-        
+
         $response->assertRedirect();
         $response->assertSessionHas('success');
 
@@ -410,7 +408,7 @@ class Sprint2OnboardingTest extends TestCase
 
         $centralDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
         $response->assertRedirect('http://' . $slug . '.' . $centralDomain . '/login');
-        
+
         $request->refresh();
         $this->assertEquals('provisioned', $request->status);
         $this->assertNull($request->activation_token);
