@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Platform;
 
 use App\Http\Controllers\Controller;
+use App\Mail\RegistrationApprovedMail;
 use App\Models\RegistrationRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class RegistrationRequestController extends Controller
@@ -46,7 +48,10 @@ class RegistrationRequestController extends Controller
                 'token_expires_at' => now()->addDays(3),
             ]);
 
-            return back()->with('success', 'تم اعتماد الطلب بنجاح وتوليد رابط التفعيل للعميل.');
+            // Dispatch Activation Email
+            Mail::to($registrationRequest->admin_email)->send(new RegistrationApprovedMail($registrationRequest));
+
+            return back()->with('success', 'تم اعتماد الطلب بنجاح وإرسال رابط التفعيل إلى بريد العميل.');
         } catch (\Exception $e) {
             return back()->with('error', 'تعذر اعتماد الطلب: '.$e->getMessage());
         }

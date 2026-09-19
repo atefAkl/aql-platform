@@ -2,12 +2,17 @@
 
 namespace Tests\Feature;
 
+use App\Mail\RegistrationApprovedMail;
 use App\Models\AuditLog;
+use App\Models\PlatformUser;
+use App\Models\RegistrationRequest;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\TenantProvisioningService;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class Sprint2OnboardingTest extends TestCase
@@ -56,7 +61,7 @@ class Sprint2OnboardingTest extends TestCase
         ], 'pgsql');
 
         // Cleanup
-        \App\Models\RegistrationRequest::where('slug', 'test-corp')->delete();
+        RegistrationRequest::where('slug', 'test-corp')->delete();
     }
 
     /**
@@ -169,10 +174,10 @@ class Sprint2OnboardingTest extends TestCase
         $response->assertRedirect('/onboarding');
         $response->assertSessionHas('success', 'تم إرسال طلب التسجيل بنجاح! طلبك الآن قيد المراجعة.');
 
-        $this->assertEquals(1, \App\Models\RegistrationRequest::where('slug', 'pending-corp')->count());
+        $this->assertEquals(1, RegistrationRequest::where('slug', 'pending-corp')->count());
 
         // Cleanup
-        \App\Models\RegistrationRequest::where('slug', 'pending-corp')->delete();
+        RegistrationRequest::where('slug', 'pending-corp')->delete();
     }
 
     /**
@@ -221,10 +226,10 @@ class Sprint2OnboardingTest extends TestCase
         ]);
 
         $secondResponse->assertSessionHasErrors('slug');
-        $this->assertEquals(1, \App\Models\RegistrationRequest::where('slug', 'unique-slug')->count());
+        $this->assertEquals(1, RegistrationRequest::where('slug', 'unique-slug')->count());
 
         // Cleanup
-        \App\Models\RegistrationRequest::where('slug', 'unique-slug')->delete();
+        RegistrationRequest::where('slug', 'unique-slug')->delete();
     }
 
     /**
@@ -265,11 +270,11 @@ class Sprint2OnboardingTest extends TestCase
             $this->assertNull($userB, 'Tenant A DB MUST NOT see Tenant B admin user');
         });
 
-        $domainB = 'http://' . $tenantB->domains->first()->domain;
+        $domainB = 'http://'.$tenantB->domains->first()->domain;
 
         // 2. HTTP Authorization Isolation: Login as Tenant B user and attempt access without Tenant A permissions
         // Note: Login now requires domain
-        $this->post($domainB . '/login', [
+        $this->post($domainB.'/login', [
             'email' => 'admin@iso-b.com',
             'password' => 'Password123!',
         ]);
@@ -286,13 +291,13 @@ class Sprint2OnboardingTest extends TestCase
             ]);
         });
 
-        $this->post($domainB . '/login', [
+        $this->post($domainB.'/login', [
             'email' => 'restricted@iso-b.com',
             'password' => 'Password123!',
         ]);
 
         // Accessing protected route without permission yields HTTP 403
-        $forbiddenResponse = $this->get($domainB . '/users');
+        $forbiddenResponse = $this->get($domainB.'/users');
         $forbiddenResponse->assertStatus(403);
 
         // Cleanup
@@ -356,8 +361,10 @@ class Sprint2OnboardingTest extends TestCase
      */
     public function test_13_platform_admin_can_approve_registration_request()
     {
-        $slug = 'approve-corp-' . strtolower(\Illuminate\Support\Str::random(5));
-        $request = \App\Models\RegistrationRequest::create([
+        Mail::fake();
+
+        $slug = 'approve-corp-'.strtolower(Str::random(5));
+        $request = RegistrationRequest::create([
             'organization_name' => 'شركة الاعتماد',
             'slug' => $slug,
             'admin_name' => 'سالم',
@@ -366,10 +373,10 @@ class Sprint2OnboardingTest extends TestCase
         ]);
 
         // Platform User authentication context
-        $platformAdmin = \App\Models\PlatformUser::factory()->create();
+        $platformAdmin = PlatformUser::factory()->create();
 
         $this->withoutExceptionHandling();
-        $response = $this->actingAs($platformAdmin, 'platform')->post('/admin/requests/' . $request->id . '/approve');
+        $response = $this->actingAs($platformAdmin, 'platform')->post('/admin/requests/'.$request->id.'/approve');
 
         $response->assertRedirect();
         $response->assertSessionHas('success');
@@ -378,6 +385,10 @@ class Sprint2OnboardingTest extends TestCase
         $this->assertEquals('approved', $request->status);
         $this->assertNotNull($request->activation_token);
         $this->assertNotNull($request->token_expires_at);
+
+        Mail::assertSent(RegistrationApprovedMail::class, function ($mail) use ($request) {
+            return $mail->hasTo('salem@approve.com') && $mail->registrationRequest->id === $request->id;
+        });
 
         // Cleanup
         $request->delete();
@@ -389,9 +400,9 @@ class Sprint2OnboardingTest extends TestCase
      */
     public function test_14_activation_token_provisions_tenant()
     {
-        $slug = 'activate-corp-' . strtolower(\Illuminate\Support\Str::random(5));
-        $token = \Illuminate\Support\Str::random(64);
-        $request = \App\Models\RegistrationRequest::create([
+        $slug = 'activate-corp-'.strtolower(Str::random(5));
+        $token = Str::random(64);
+        $request = RegistrationRequest::create([
             'organization_name' => 'شركة التفعيل',
             'slug' => $slug,
             'admin_name' => 'نادر',
@@ -401,13 +412,13 @@ class Sprint2OnboardingTest extends TestCase
             'token_expires_at' => now()->addDays(1),
         ]);
 
-        $response = $this->post('/activation/' . $token, [
+        $response = $this->post('/activation/'.$token, [
             'password' => 'SecurePass123!',
             'password_confirmation' => 'SecurePass123!',
         ]);
 
         $centralDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
-        $response->assertRedirect('http://' . $slug . '.' . $centralDomain . '/login');
+        $response->assertRedirect('http://'.$slug.'.'.$centralDomain.'/login');
 
         $request->refresh();
         $this->assertEquals('provisioned', $request->status);
