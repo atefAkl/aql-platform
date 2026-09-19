@@ -1,168 +1,109 @@
 import React from 'react';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { Building2, CheckCircle, Clock, Globe, ShieldAlert, LogOut } from 'lucide-react';
+import { Head, Link } from '@inertiajs/react';
+import { Building2, Clock, CheckCircle, PauseCircle, Users, LayoutDashboard, ArrowLeft } from 'lucide-react';
+import PlatformLayout from '../../Layouts/PlatformLayout';
+import { StatCard } from '../../Components/Molecules/StatCard';
+import { Button } from '../../Components/Atoms/Button';
 
-interface RegistrationRequest {
-    id: number;
-    organization_name: string;
-    slug: string;
-    admin_name: string;
-    admin_email: string;
-    status: 'pending' | 'approved' | 'provisioned';
-    created_at: string;
+interface Stats {
+    total_tenants: number;
+    active_tenants: number;
+    pending_requests: number;
+    approved_requests: number;
+    suspended_requests: number;
+    platform_users: number;
 }
 
 interface Props {
-    requests: RegistrationRequest[];
+    stats: Stats;
 }
 
-export default function Dashboard({ requests }: Props) {
-    const { post, processing } = useForm();
-
-    const approveRequest = (id: number) => {
-        if (confirm('هل أنت متأكد من اعتماد هذا الطلب وإرسال رابط التفعيل؟')) {
-            post(`/admin/requests/${id}/approve`);
-        }
-    };
-
+export default function Dashboard({ stats }: Props) {
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-100 font-sans" dir="rtl">
-            <Head title="لوحة تحكم المنصة" />
+        <PlatformLayout>
+            <Head title="لوحة التحكّم الرئيسية" />
 
-            {/* Navbar */}
-            <nav className="bg-slate-900 border-b border-slate-800 px-6 py-4 flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-900/30">
-                        <ShieldAlert className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                        <h1 className="font-bold text-lg">لوحة تحكم المنصة (Landlord)</h1>
-                        <p className="text-xs text-slate-400">إدارة المستأجرين والطلبات</p>
-                    </div>
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+                <div>
+                    <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                        <LayoutDashboard className="w-6 h-6 text-indigo-500" />
+                        لوحة تحكّم المنصة (Landlord)
+                    </h1>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        مرحباً بك في المركز الرئيسي لإدارة منصة عقل لخدمات Cloud SaaS
+                    </p>
                 </div>
-                
-                <Link
-                    href="/logout"
-                    method="post"
-                    as="button"
-                    className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors bg-slate-800 px-4 py-2 rounded-lg hover:bg-slate-700"
-                >
-                    <LogOut className="w-4 h-4" />
-                    تسجيل الخروج
-                </Link>
-            </nav>
+                <div>
+                    <Link href="/admin/requests">
+                        <Button variant="primary" size="sm" className="gap-2">
+                            إدارة طلبات التسجيل
+                            <ArrowLeft className="w-4 h-4" />
+                        </Button>
+                    </Link>
+                </div>
+            </div>
 
-            <main className="max-w-7xl mx-auto p-6 space-y-8 mt-6">
-                
-                {/* Stats Header */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex items-center gap-4">
-                        <div className="p-4 bg-emerald-900/30 text-emerald-400 rounded-xl">
-                            <Building2 className="w-8 h-8" />
-                        </div>
-                        <div>
-                            <p className="text-slate-400 text-sm">المستأجرين النشطين</p>
-                            <h3 className="text-2xl font-bold text-white">
-                                {requests.filter(r => r.status === 'provisioned').length}
-                            </h3>
-                        </div>
-                    </div>
-                    <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex items-center gap-4">
-                        <div className="p-4 bg-amber-900/30 text-amber-400 rounded-xl">
-                            <Clock className="w-8 h-8" />
-                        </div>
-                        <div>
-                            <p className="text-slate-400 text-sm">طلبات قيد الانتظار</p>
-                            <h3 className="text-2xl font-bold text-white">
-                                {requests.filter(r => r.status === 'pending').length}
-                            </h3>
-                        </div>
-                    </div>
-                    <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex items-center gap-4">
-                        <div className="p-4 bg-indigo-900/30 text-indigo-400 rounded-xl">
-                            <CheckCircle className="w-8 h-8" />
-                        </div>
-                        <div>
-                            <p className="text-slate-400 text-sm">طلبات بانتظار التفعيل</p>
-                            <h3 className="text-2xl font-bold text-white">
-                                {requests.filter(r => r.status === 'approved').length}
-                            </h3>
-                        </div>
-                    </div>
-                </div>
+            {/* High Level Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                <StatCard
+                    title="إجمالي المستأجرين"
+                    value={stats.total_tenants}
+                    icon={<Building2 className="w-5 h-5" />}
+                    colorScheme="indigo"
+                    subtext="المؤسسات المسجلة"
+                />
+                <StatCard
+                    title="المستأجرين النشطين"
+                    value={stats.active_tenants}
+                    icon={<CheckCircle className="w-5 h-5" />}
+                    colorScheme="emerald"
+                    subtext="مستأجرين يعملون حالياً"
+                />
+                <StatCard
+                    title="طلبات قيد الانتظار"
+                    value={stats.pending_requests}
+                    icon={<Clock className="w-5 h-5" />}
+                    colorScheme="amber"
+                    subtext="تتطلب المراجعة"
+                />
+                <StatCard
+                    title="طلبات معتمدة"
+                    value={stats.approved_requests}
+                    icon={<CheckCircle className="w-5 h-5" />}
+                    colorScheme="blue"
+                    subtext="في انتظار تفعيل العميل"
+                />
+                <StatCard
+                    title="طلبات موقوفة"
+                    value={stats.suspended_requests}
+                    icon={<PauseCircle className="w-5 h-5" />}
+                    colorScheme="rose"
+                    subtext="معطلة مؤقتاً"
+                />
+                <StatCard
+                    title="مدراء المنصة"
+                    value={stats.platform_users}
+                    icon={<Users className="w-5 h-5" />}
+                    colorScheme="indigo"
+                    subtext="طاقم إدارة Landlord"
+                />
+            </div>
 
-                {/* Requests Table */}
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-                    <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-800/50">
-                        <h2 className="text-lg font-bold flex items-center gap-2">
-                            <Globe className="w-5 h-5 text-indigo-400" />
-                            طلبات تسجيل المؤسسات
-                        </h2>
+            {/* Clean Main Content Placeholder for Future Admin Widgets */}
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-12 text-center border-dashed">
+                <div className="max-w-md mx-auto space-y-4">
+                    <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-full flex items-center justify-center mx-auto">
+                        <LayoutDashboard className="w-8 h-8" />
                     </div>
-                    
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-right">
-                            <thead className="bg-slate-900 border-b border-slate-800 text-slate-400 text-sm">
-                                <tr>
-                                    <th className="px-6 py-4 font-semibold">المؤسسة</th>
-                                    <th className="px-6 py-4 font-semibold">الدومين (Slug)</th>
-                                    <th className="px-6 py-4 font-semibold">المدير</th>
-                                    <th className="px-6 py-4 font-semibold">التاريخ</th>
-                                    <th className="px-6 py-4 font-semibold">الحالة</th>
-                                    <th className="px-6 py-4 font-semibold">الإجراء</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-800/50">
-                                {requests.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={6} className="px-6 py-8 text-center text-slate-500">
-                                            لا توجد طلبات تسجيل حالياً
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    requests.map((request) => (
-                                        <tr key={request.id} className="hover:bg-slate-800/20 transition-colors">
-                                            <td className="px-6 py-4 font-medium">{request.organization_name}</td>
-                                            <td className="px-6 py-4 text-indigo-400" dir="ltr">{request.slug}.platform.local</td>
-                                            <td className="px-6 py-4">
-                                                <div className="text-sm">{request.admin_name}</div>
-                                                <div className="text-xs text-slate-400">{request.admin_email}</div>
-                                            </td>
-                                            <td className="px-6 py-4 text-sm text-slate-400">
-                                                {new Date(request.created_at).toLocaleDateString('ar-EG')}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                {request.status === 'pending' && (
-                                                    <span className="bg-amber-500/10 text-amber-400 px-3 py-1 rounded-full text-xs font-semibold border border-amber-500/20">قيد الانتظار</span>
-                                                )}
-                                                {request.status === 'approved' && (
-                                                    <span className="bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-full text-xs font-semibold border border-indigo-500/20">بانتظار تفعيل العميل</span>
-                                                )}
-                                                {request.status === 'provisioned' && (
-                                                    <span className="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-xs font-semibold border border-emerald-500/20">نشط (مُهيأ)</span>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                {request.status === 'pending' ? (
-                                                    <button
-                                                        onClick={() => approveRequest(request.id)}
-                                                        disabled={processing}
-                                                        className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
-                                                    >
-                                                        اعتماد الطلب
-                                                    </button>
-                                                ) : (
-                                                    <span className="text-slate-500 text-xs">-</span>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                    <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200">
+                        مرحباً بك في لوحة القيادة
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        تم تخصيص هذه المساحة للتحليلات المتقدمة ومخططات الأداء ومراقبة خوادم المنصة والتي سيتم إضافتها في المراحل القادمة.
+                    </p>
                 </div>
-            </main>
-        </div>
+            </div>
+        </PlatformLayout>
     );
 }
