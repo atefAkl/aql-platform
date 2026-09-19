@@ -2,23 +2,22 @@
 
 namespace Tests\Feature;
 
-use App\Models\AuditLog;
 use App\Models\Tenant;
-use App\Models\User;
 use App\Services\TenantProvisioningService;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
 {
     protected Tenant $tenant;
+
     protected string $tenantId;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $service = new TenantProvisioningService();
-        $this->tenantId = 'authsuite' . rand(1000, 9999);
+        $service = new TenantProvisioningService;
+        $this->tenantId = 'authsuite'.rand(1000, 9999);
         $res = $service->createTenant(
             $this->tenantId,
             'شركة مصادقة الهوية',
@@ -28,7 +27,6 @@ class AuthTest extends TestCase
         );
         $this->tenant = $res['tenant'];
     }
-
 
     protected function tearDown(): void
     {
@@ -41,7 +39,7 @@ class AuthTest extends TestCase
 
     public function test_valid_user_login_succeeds_and_regenerates_session()
     {
-        $domain = $this->tenantId . '.localhost';
+        $domain = $this->tenant->domains()->first()->domain;
         $response = $this->post("http://{$domain}/login", [
             'email' => "admin@{$this->tenantId}.com",
             'password' => 'password123',
@@ -60,7 +58,7 @@ class AuthTest extends TestCase
 
     public function test_invalid_password_login_fails()
     {
-        $domain = $this->tenantId . '.localhost';
+        $domain = $this->tenant->domains()->first()->domain;
         $response = $this->post("http://{$domain}/login", [
             'email' => "admin@{$this->tenantId}.com",
             'password' => 'wrong-password',
@@ -72,7 +70,7 @@ class AuthTest extends TestCase
 
     public function test_unknown_user_login_fails()
     {
-        $domain = $this->tenantId . '.localhost';
+        $domain = $this->tenant->domains()->first()->domain;
         $response = $this->post("http://{$domain}/login", [
             'email' => "nonexistent@{$this->tenantId}.com",
             'password' => 'password123',
@@ -84,7 +82,7 @@ class AuthTest extends TestCase
 
     public function test_logout_terminates_session_and_records_audit_log()
     {
-        $domain = $this->tenantId . '.localhost';
+        $domain = $this->tenant->domains()->first()->domain;
         // Login first
         $this->post("http://{$domain}/login", [
             'email' => "admin@{$this->tenantId}.com",

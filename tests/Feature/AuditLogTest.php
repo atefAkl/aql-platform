@@ -13,14 +13,15 @@ use Tests\TestCase;
 class AuditLogTest extends TestCase
 {
     protected Tenant $tenant;
+
     protected string $tenantId;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $service = new TenantProvisioningService();
-        $this->tenantId = 'auditsuite' . rand(1000, 9999);
+        $service = new TenantProvisioningService;
+        $this->tenantId = 'auditsuite'.rand(1000, 9999);
         $res = $service->createTenant(
             $this->tenantId,
             'شركة السجل والتدقيق',
@@ -30,7 +31,6 @@ class AuditLogTest extends TestCase
         );
         $this->tenant = $res['tenant'];
     }
-
 
     protected function tearDown(): void
     {
@@ -43,7 +43,7 @@ class AuditLogTest extends TestCase
 
     public function test_audit_log_records_tenant_provisioning_and_user_creation()
     {
-        $domain = $this->tenantId . '.localhost';
+        $domain = $this->tenant->domains()->first()->domain;
         // 1. Verify TENANT_PROVISIONED event
         $this->tenant->run(function () {
             $log = AuditLog::where('action', 'TENANT_PROVISIONED')->first();
@@ -80,7 +80,7 @@ class AuditLogTest extends TestCase
 
     public function test_audit_log_records_permissions_updated_event()
     {
-        $domain = $this->tenantId . '.localhost';
+        $domain = $this->tenant->domains()->first()->domain;
         $this->post("http://{$domain}/login", [
             'email' => "admin@{$this->tenantId}.com",
             'password' => 'password123',

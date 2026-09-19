@@ -12,14 +12,15 @@ use Tests\TestCase;
 class AuthorizationTest extends TestCase
 {
     protected Tenant $tenant;
+
     protected string $tenantId;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $service = new TenantProvisioningService();
-        $this->tenantId = 'authzsuite' . rand(1000, 9999);
+        $service = new TenantProvisioningService;
+        $this->tenantId = 'authzsuite'.rand(1000, 9999);
         $res = $service->createTenant(
             $this->tenantId,
             'شركة التحكم بالصلاحيات',
@@ -29,7 +30,6 @@ class AuthorizationTest extends TestCase
         );
         $this->tenant = $res['tenant'];
     }
-
 
     protected function tearDown(): void
     {
@@ -42,7 +42,7 @@ class AuthorizationTest extends TestCase
 
     public function test_authorized_user_can_access_permitted_routes()
     {
-        $domain = $this->tenantId . '.localhost';
+        $domain = $this->tenant->domains()->first()->domain;
         $this->post("http://{$domain}/login", [
             'email' => "admin@{$this->tenantId}.com",
             'password' => 'password123',
@@ -57,7 +57,7 @@ class AuthorizationTest extends TestCase
 
     public function test_unauthorized_user_is_denied_access()
     {
-        $domain = $this->tenantId . '.localhost';
+        $domain = $this->tenant->domains()->first()->domain;
         // Create a user with NO permissions
         $restrictedUser = null;
         $this->tenant->run(function () use (&$restrictedUser) {
