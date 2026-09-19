@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import PlatformLayout from '../../Layouts/PlatformLayout';
+import TenantLayout from '../../Layouts/TenantLayout';
 import { useForm, router } from '@inertiajs/react';
 import { Users, UserPlus, Shield, Check, Save, UserCheck, Briefcase } from 'lucide-react';
 import { User as UserType } from '../../types';
@@ -83,7 +83,7 @@ export default function UsersIndex({ users, roles, permissions }: UsersIndexProp
     };
 
     return (
-        <PlatformLayout title="إدارة الموظفين والأدوار والصلاحيات">
+        <TenantLayout title="إدارة الموظفين والأدوار والصلاحيات">
             <div className="space-y-6">
                 
                 {/* Header */}
@@ -327,6 +327,6 @@ export default function UsersIndex({ users, roles, permissions }: UsersIndexProp
                     </div>
                 </div>
             </div>
-        </PlatformLayout>
+        </TenantLayout>
     );
 }

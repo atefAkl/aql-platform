@@ -10,7 +10,7 @@ export interface RegistrationRequestData {
     slug: string;
     admin_name: string;
     admin_email: string;
-    status: 'pending' | 'approved' | 'suspended';
+    status: 'pending' | 'approved' | 'suspended' | 'provisioned';
     activation_token?: string | null;
     token_expires_at?: string | null;
     created_at: string;
@@ -53,7 +53,7 @@ export const RegistrationRequestDetailsModal: React.FC<RegistrationRequestDetail
                         </div>
                     </div>
                     <Badge variant={request.status}>
-                        {request.status === 'pending' ? 'قيد الانتظار' : request.status === 'approved' ? 'معتمد / بانتظار التفعيل' : 'معطل مؤقتاً'}
+                        {request.status === 'pending' ? 'قيد الانتظار' : request.status === 'approved' ? 'معتمد / بانتظار التفعيل' : request.status === 'provisioned' ? 'مفعل' : 'معطل مؤقتاً'}
                     </Badge>
                 </div>
 

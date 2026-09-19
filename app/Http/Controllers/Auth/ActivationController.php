@@ -38,6 +38,7 @@ class ActivationController extends Controller
 
         try {
             $centralDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
+            $centralDomain = preg_replace('/^www\./', '', $centralDomain);
             $domainName = $registrationRequest->slug.'.'.$centralDomain;
 
             $result = $provisioningService->createTenant(

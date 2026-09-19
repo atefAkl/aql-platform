@@ -223,7 +223,7 @@ export default function RegistrationRequestsIndex({ requests, currentFilter = 'a
                                             </td>
                                             <td className="px-4 py-3.5">
                                                 <Badge variant={req.status}>
-                                                    {req.status === 'pending' ? 'قيد الانتظار' : req.status === 'approved' ? 'بانتظار التفعيل' : 'معطل مؤقتاً'}
+                                                    {req.status === 'pending' ? 'قيد الانتظار' : req.status === 'approved' ? 'بانتظار التفعيل' : req.status === 'provisioned' ? 'مفعل' : 'معطل مؤقتاً'}
                                                 </Badge>
                                             </td>
                                             <td className="px-4 py-3.5 text-center">

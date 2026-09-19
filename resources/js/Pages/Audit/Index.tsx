@@ -1,5 +1,5 @@
 import React from 'react';
-import PlatformLayout from '../../Layouts/PlatformLayout';
+import TenantLayout from '../../Layouts/TenantLayout';
 import { ClipboardList } from 'lucide-react';
 
 interface AuditLogItem {
@@ -22,7 +22,7 @@ interface AuditIndexProps {
 
 export default function AuditIndex({ auditLogs }: AuditIndexProps) {
     return (
-        <PlatformLayout title="سجل العمليات الحساسة">
+        <TenantLayout title="سجل العمليات الحساسة">
             <div className="space-y-6">
                 
                 {/* Header */}
@@ -86,6 +86,6 @@ export default function AuditIndex({ auditLogs }: AuditIndexProps) {
                     </table>
                 </div>
             </div>
-        </PlatformLayout>
+        </TenantLayout>
     );
 }
