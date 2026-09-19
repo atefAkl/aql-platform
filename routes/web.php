@@ -5,31 +5,57 @@ use App\Http\Controllers\Auth\OnboardingController;
 use App\Http\Controllers\Auth\UnifiedLoginController;
 use App\Http\Controllers\Platform\DashboardController;
 use App\Http\Controllers\Platform\RegistrationRequestController;
-use App\Models\Tenant;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// Central / Local Default Routes
-Route::get('/', function () {
-    return (Tenant::count() === 0) ? redirect('/onboarding') : redirect('/onboarding');
+/*
+|--------------------------------------------------------------------------
+| Global / Domain-Aware Routes (Landlord vs Tenant Context Handling)
+|--------------------------------------------------------------------------
+*/
+
+// Root Domain Dispatcher (Central -> /onboarding | Tenant -> /login)
+Route::get('/', function (Request $request) {
+    $centralDomains = config('tenancy.central_domains', []);
+    if (in_array($request->getHost(), $centralDomains, true)) {
+        return redirect('/onboarding');
+    }
+
+    return redirect('/login');
 });
 
-// Public Tenant Onboarding Registration Routes (Sprint 2 / 3)
-Route::get('/onboarding', [OnboardingController::class, 'create'])->name('onboarding');
-Route::post('/onboarding', [OnboardingController::class, 'store']);
+// Onboarding Registration Routes (Central Domain Only - Tenant subdomains redirect to /login)
+Route::get('/onboarding', function (Request $request) {
+    $centralDomains = config('tenancy.central_domains', []);
+    if (! in_array($request->getHost(), $centralDomains, true)) {
+        return redirect('/login');
+    }
 
+    return app(OnboardingController::class)->create();
+})->name('onboarding');
+
+Route::post('/onboarding', function (Request $request) {
+    $centralDomains = config('tenancy.central_domains', []);
+    if (! in_array($request->getHost(), $centralDomains, true)) {
+        return redirect('/login');
+    }
+
+    return app(OnboardingController::class)->store($request);
+});
+
+// Account Activation Routes
 Route::get('/activation/{token}', [ActivationController::class, 'show'])->name('activation.show');
 Route::post('/activation/{token}', [ActivationController::class, 'store'])->name('activation.store');
 
-// Unified Authentication Routes (Domain-Aware)
+// Unified Domain-Aware Authentication Routes (Central -> Platform Admin Login | Tenant -> Workspace Login)
 Route::get('/login', [UnifiedLoginController::class, 'create'])->name('login');
 Route::post('/login', [UnifiedLoginController::class, 'store']);
 Route::post('/logout', [UnifiedLoginController::class, 'destroy'])->name('logout');
 
-// Platform Administration Routes
+// Platform Administration Routes (Landlord Admin Only)
 Route::prefix('admin')->group(function () {
     Route::middleware('auth:platform')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('platform.dashboard');
-
         Route::get('/requests', [RegistrationRequestController::class, 'index'])->name('platform.requests.index');
         Route::post('/requests/{registrationRequest}/approve', [RegistrationRequestController::class, 'approve'])->name('platform.requests.approve');
         Route::post('/requests/{registrationRequest}/suspend', [RegistrationRequestController::class, 'suspend'])->name('platform.requests.suspend');

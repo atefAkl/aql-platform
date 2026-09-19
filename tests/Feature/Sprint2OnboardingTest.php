@@ -44,6 +44,8 @@ class Sprint2OnboardingTest extends TestCase
      */
     public function test_2_onboarding_creates_registration_request()
     {
+        RegistrationRequest::where('slug', 'test-corp')->delete();
+
         $response = $this->post('/onboarding', [
             'organization_name' => 'شركة الابتكار',
             'slug' => 'test-corp',
@@ -164,6 +166,8 @@ class Sprint2OnboardingTest extends TestCase
      */
     public function test_6_registration_shows_pending_message()
     {
+        RegistrationRequest::where('slug', 'pending-corp')->delete();
+
         $response = $this->post('/onboarding', [
             'organization_name' => 'شركة الطلب المعلق',
             'slug' => 'pending-corp',
