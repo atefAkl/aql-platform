@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\RegistrationRequest;
 use App\Services\TenantProvisioningService;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Validation\Rules\Password;
+use Inertia\Inertia;
 
 class ActivationController extends Controller
 {
@@ -38,7 +38,7 @@ class ActivationController extends Controller
 
         try {
             $centralDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
-            $domainName = $registrationRequest->slug . '.' . $centralDomain;
+            $domainName = $registrationRequest->slug.'.'.$centralDomain;
 
             $result = $provisioningService->createTenant(
                 $registrationRequest->slug,
@@ -56,9 +56,9 @@ class ActivationController extends Controller
                 'token_expires_at' => null,
             ]);
 
-            return redirect()->to('http://' . $domainName . '/login')->with('success', 'تم تفعيل الحساب وتجهيز مؤسستك. يمكنك الآن تسجيل الدخول.');
+            return Inertia::location('http://'.$domainName.'/login');
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'حدث خطأ أثناء تهيئة المنصة: ' . $e->getMessage()]);
+            return back()->withErrors(['error' => 'حدث خطأ أثناء تهيئة المنصة: '.$e->getMessage()]);
         }
     }
 }

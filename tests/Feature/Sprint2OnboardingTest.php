@@ -412,13 +412,14 @@ class Sprint2OnboardingTest extends TestCase
             'token_expires_at' => now()->addDays(1),
         ]);
 
-        $response = $this->post('/activation/'.$token, [
+        $response = $this->withHeaders(['X-Inertia' => 'true'])->post('/activation/'.$token, [
             'password' => 'SecurePass123!',
             'password_confirmation' => 'SecurePass123!',
         ]);
 
         $centralDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
-        $response->assertRedirect('http://'.$slug.'.'.$centralDomain.'/login');
+        $response->assertStatus(409);
+        $response->assertHeader('X-Inertia-Location', 'http://'.$slug.'.'.$centralDomain.'/login');
 
         $request->refresh();
         $this->assertEquals('provisioned', $request->status);
