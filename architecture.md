@@ -28,8 +28,9 @@
 22. [معمارية النشر (Deployment Architecture)](#22-معمارية-النشر-deployment-architecture)
 23. [معمارية التكامل (Integration Architecture)](#23-معمارية-التكامل-integration-architecture)
 24. [الإصدارات والتوافق (Versioning & Compatibility)](#24-الإصدارات-والتوافق-versioning--compatibility)
-25. [الحالة الحالية للمعمارية (Current Architecture Status)](#25-الحالة-الحالية-للمعمارية-current-architecture-status)
-26. [مراجع القرارات المعمارية (Architecture Decision References)](#26-مراجع-القرارات-المعمارية-architecture-decision-references)
+25. [دورة حياة المستأجر وتهيئته (Tenant Lifecycle & Provisioning)](#25-دورة-حياة-المستأجر-وتهيئته-tenant-lifecycle--provisioning)
+26. [الحالة الحالية للمعمارية (Current Architecture Status)](#26-الحالة-الحالية-للمعمارية-current-architecture-status)
+27. [مراجع القرارات المعمارية (Architecture Decision References)](#27-مراجع-القرارات-المعمارية-architecture-decision-references)
 
 ## 1. نظرة عامة (Overview)
 
@@ -1524,11 +1525,11 @@ Permissions
 
 ## 10.1 الهوية
 
-تكون هوية المستخدم مركزية على مستوى المنصة، ولا يقوم كل Application بإنشاء هوية مستقلة للمستخدم.
+تنقسم الهوية إلى **Platform Identity** و **Tenant Identity** وفق حدود السياق. Platform Identity تُدار في Platform/Landlord Context، بينما Tenant Identity تُدار داخل Tenant Context الخاص بالمستأجر. ولا يقوم كل Application بإنشاء نظام هوية مستقل عن نموذج المنصة المعتمد.
 
 ## 10.2 المصادقة
 
-تتم المصادقة من خلال آلية موحدة توفرها المنصة.
+تتم المصادقة من خلال آلية توفرها المنصة، مع تطبيقها داخل السياق الصحيح: Platform Authentication داخل Platform Context وTenant Authentication داخل Tenant Context.
 
 التطبيقات تعتمد على نتيجة المصادقة ولا تنفذ نظام Login مستقلًا.
 
@@ -2089,17 +2090,17 @@ Inventory
 
 ### 19.4 بيانات المنصة
 
-تمتلك المنصة البيانات المرتبطة بالقدرات المركزية التي تديرها، مثل:
+تمتلك المنصة في **Landlord / Platform Context** البيانات المركزية الخاصة بإدارة المنصة، مثل:
 
-- Users.
-- Organizations.
-- Roles.
-- Permissions.
-- Settings.
-- Modules.
-- Audit.
+- Platform Users.
+- Tenants / Organizations.
+- Domains.
+- Subscriptions / Entitlements.
+- Module Registry.
+- Platform Configuration.
+- Platform Audit.
 
-بينما تمتلك التطبيقات بيانات المجالات الخاصة بها.
+بينما تمتلك كل Tenant في **Tenant Context** بيانات Tenant Users وبيانات الأعمال الخاصة بالتطبيقات/الموديولات التي يعمل بها. ولا يعني وجود خدمة Identity مركزية وجود جدول مستخدم واحد مشترك بين Platform Users وTenant Users.
 
 ### 19.5 العلاقات بين البيانات
 
@@ -2268,12 +2269,6 @@ Result
 يتم تحديد هذه التفاصيل لاحقًا من خلال قرارات معمارية مستقلة عند الحاجة.
 
 ```
-
-**كده وصلنا إلى 20.**
-
-والنقطة المهمة هنا: أنا حافظت على نفس المبدأ الذي اتفقنا عليه في الأقسام السابقة: **المعمارية تحدد الحدود والقواعد، أما اختيار Laravel Queue/Redis أو نوع الـAPI أو قاعدة البيانات أو أدوات الـMonitoring فنتركه للـADR.**
-
-بعد اعتمادك لهذه الأربعة، ننتقل إلى **21 → 24**، ثم نختم بـ25 و26.
 ```
 
 ## 21. معمارية الرصد والمراقبة (Observability Architecture)
@@ -2618,7 +2613,194 @@ External Service
 
 يتم تحديد هذه التفاصيل لاحقًا من خلال قرارات معمارية مستقلة عند الحاجة.
 
-## 25. الحالة الحالية للمعمارية (Current Architecture Status)
+## 25. دورة حياة المستأجر وتهيئته (Tenant Lifecycle & Provisioning)
+
+تحدد هذه المعمارية دورة حياة المستأجر منذ تقديم طلب التسجيل وحتى الوصول إلى حالة **Active Tenant**، مع الفصل الواضح بين إنشاء سجل المستأجر، وتفعيل الحساب، وتهيئة بيئة المستأجر.
+
+### 25.1 المبدأ الأساسي
+
+**Tenant Account** و **Tenant User** مفهومان مختلفان:
+
+- **Tenant Account** يمثل حساب/مؤسسة المستأجر وسياقه التشغيلي على مستوى المنصة.
+- **Tenant User** يمثل مستخدمًا داخل قاعدة بيانات المستأجر، وتتم إدارة هويته وصلاحياته داخل Tenant Context.
+
+لا يجوز اكتشاف المستأجر بالبحث داخل قواعد بيانات المستأجرين عن البريد الإلكتروني. يجب أولًا تحديد Tenant Context بصورة حتمية، ثم التعامل مع المستخدم داخل المستأجر المحدد.
+
+### 25.2 دورة التسجيل والتهيئة
+
+الدورة المعتمدة هي:
+
+```text
+Registration
+    │
+    │ Initial Data
+    │ Email / Phone / Unique Name / Company Name / ...
+    ▼
+Approval
+    │
+    ├── Create Tenant
+    ├── Create / Reserve Subdomain
+    └── Send Activation Link
+            │
+            ▼
+        Activation
+            │
+            ▼
+      Data Collection
+            │
+            ▼
+        Provisioning
+            │
+            ├── Tenant Database
+            ├── Migrations
+            ├── Base Data
+            └── Initial Tenant Admin
+            │
+            ▼
+       Active Tenant
+```
+
+وجود Tenant Record بعد **Approval** لا يعني أن المستأجر أصبح Tenant نشطًا أو جاهزًا للتشغيل. تظل حالة المستأجر غير نشطة إلى أن تكتمل **Activation + Data Collection + Provisioning**.
+
+### 25.3 Registration
+
+تبدأ الدورة بطلب تسجيل يحتوي على البيانات الأولية المطلوبة، مثل Email وPhone وUnique Name وCompany Name وأي بيانات أخرى مطلوبة. في هذه المرحلة لا يتم إنشاء قاعدة بيانات تشغيلية كاملة للمستأجر.
+
+### 25.4 Approval
+
+بعد الموافقة من Platform Administrator أو الجهة المخولة:
+
+1. يتم إنشاء **Tenant Record** في Platform/Landlord Context.
+2. يتم إنشاء أو حجز **Unique Subdomain**.
+3. يتم إنشاء **Activation Token / Activation Link**.
+4. يتم إرسال رابط التفعيل.
+
+لا يبدأ **Tenant Database Provisioning** في مرحلة Approval.
+
+### 25.5 Activation
+
+يستخدم صاحب الطلب رابط التفعيل للوصول إلى سياق المستأجر المحدد والانتقال إلى مرحلة استكمال البيانات.
+
+### 25.6 Data Collection
+
+يستكمل المستخدم البيانات المطلوبة لتجهيز المستأجر، مع الاحتفاظ بالبيانات الأساسية التي تم جمعها أثناء Registration.
+
+### 25.7 Provisioning
+
+يبدأ Provisioning **بعد Activation وData Collection**، ويحول Tenant المعتمد والمُفعّل إلى بيئة تشغيل جاهزة. ويشمل على الأقل:
+
+1. إنشاء Tenant Database.
+2. تشغيل Migrations الخاصة بالمنصة/الوحدات المطلوبة عند التهيئة.
+3. إنشاء Base Data.
+4. إنشاء Initial Tenant Admin.
+5. إكمال خطوات التهيئة اللازمة لجعل Tenant جاهزًا للتشغيل.
+
+يجب أن تكون العملية قابلة للفشل الآمن، وأن تتعامل مع الأخطاء من خلال **Rollback / Compensation** وفق القرارات المعتمدة.
+
+### 25.8 Active Tenant
+
+يصبح Tenant في حالة **Active** فقط بعد نجاح Provisioning بالكامل. بعد ذلك تخضع العمليات إلى Tenant Operational State وSubscription / Entitlements وModule Availability وUser Authentication وPermissions.
+
+### 25.9 تحديد سياق المستأجر — Tenant Resolution
+
+يجب أن يحدد النظام Tenant Context قبل التعامل مع Tenant User أو بيانات Tenant. لطلب مثل `abc.aqlsoftware.com` يكون المسار المفاهيمي:
+
+```text
+Resolve Tenant
+    ↓
+Validate Tenant Context / Operational State
+    ↓
+Determine Requested Resource / Module Policy
+    ↓
+Validate Subscription / Module Availability
+    ↓
+Resolve Tenant User (if protected)
+    ↓
+Check User Status
+    ↓
+Check Permission (if required)
+    ↓
+Execute Requested URI
+```
+
+إذا كان المورد أو الـEndpoint عامًا ولا يحتاج إلى مصادقة أو صلاحية، فلا توجد حاجة للبحث عن مستخدم أو تنفيذ Permission Check. ويجب الحفاظ على **Requested URI / Intended URL** عند الحاجة، بدل تحويل المستخدم دائمًا إلى Dashboard.
+
+### 25.10 Platform Context
+
+الوصول إلى النطاق المركزي مثل `aql-platform.com` يعمل ضمن **Platform Context** مستقل عن Tenant Context:
+
+```text
+Platform Domain
+    ↓
+Platform Context
+    ↓
+Landlord Database
+    ↓
+Platform User
+    ↓
+Platform Permissions
+    ↓
+Platform Administration
+```
+
+لا يتم استخدام Tenant User Authentication للوصول إلى Platform Administration، ولا يتم اكتشاف Platform User من خلال Tenant Databases.
+
+### 25.11 Platform Identity vs Tenant Identity
+
+```text
+Platform Identity
+    │
+    └── Landlord / Platform Context
+
+Tenant Identity
+    │
+    └── Tenant Context / Tenant Database
+```
+
+**Platform User** يدير المنصة والبيانات الإدارية الخاصة بها وفق صلاحياته، ولا يملك بذلك وصولًا مباشرًا إلى Tenant Business Data. **Tenant User** يعمل داخل Tenant Context الخاص بالمستأجر ولا يملك الوصول إلى Platform Administration.
+
+### 25.12 Subscription قبل User Authorization
+
+في الطلبات المحمية، يجب التحقق من أن المورد/الموديول المطلوب متاح للمستأجر وفق الاشتراك والـEntitlements قبل السماح للمستخدم بتنفيذ الوظيفة:
+
+```text
+Tenant
+  ↓
+Subscription
+  ↓
+User
+  ↓
+Permission
+  ↓
+Requested Operation
+```
+
+الموارد العامة لا تحتاج إلى User أو Permission resolution.
+
+### 25.13 مسؤولية Platform وApplication
+
+| المسؤولية | Platform | Application / Module |
+|---|---|---|
+| Tenant Resolution | نعم | لا |
+| Tenant Operational State | نعم | يستفيد من النتيجة |
+| Subscription / Entitlement | نعم | لا يدير الاشتراك |
+| Platform Identity | نعم | لا |
+| Tenant User Identity | يوفر الإطار | يستهلكه داخل Tenant Context |
+| Module Availability | نعم | يحدد احتياجاته وMetadata |
+| Business Logic | لا | نعم |
+| Business Data Ownership | لا | نعم |
+| Module-specific Permissions | يدير الآلية المركزية | يعرّف صلاحيات مجاله |
+| Requested Resource Execution | يحدد الحدود والسياسات | ينفذ منطق المجال |
+
+### 25.14 مبدأ الفصل بين الحالات
+
+يجب التمييز بين Registration Request وApproved Tenant وActivated Tenant وProvisioned Tenant وActive Tenant. لا يجوز اختزال هذه المراحل في حالة واحدة إذا أدى ذلك إلى الخلط بين هوية الحساب وحالة جاهزية بيئته التشغيلية.
+
+### 25.15 الحالة الحالية
+
+تحدد هذه الوثيقة دورة الحياة والمبادئ المعمارية العامة فقط. أما واجهة Approval النهائية وActivation Token ومزود البريد وBackground Job وRetry وRetention/Deletion وBilling/Payment فتحدد لاحقًا من خلال ADR أو Contract عند الحاجة.
+
+## 26. الحالة الحالية للمعمارية (Current Architecture Status)
 
 تمثل هذه الوثيقة في إصدارها الحالي التصور المعماري المعتمد حتى النقطة التي تمت مراجعتها واعتمادها.
 
@@ -2627,7 +2809,7 @@ External Service
 الإصدار المعماري الحالي:
 
 ```text
-v0.1
+v0.2
 ```
 
 ### 25.2 حالة المعمارية
@@ -2697,7 +2879,7 @@ Architecture in Definition
 
 ولا ينبغي اعتبار أي تقنية أو آلية تنفيذية معتمدة لمجرد ذكرها في أمثلة أو مقترحات داخل هذه الوثيقة.
 
-## 26. مراجع القرارات المعمارية (Architecture Decision References)
+## 27. مراجع القرارات المعمارية (Architecture Decision References)
 
 تحدد هذه الوثيقة الشكل العام للمعمارية والقواعد التي تحكمها، بينما يتم توثيق أسباب القرارات المعمارية والتقنية المهمة في ملف:
 
@@ -2761,6 +2943,8 @@ Architecture
         ↓
 Platform Contract
         ↓
+Roadmap
+        ↓
 Implementation
 ```
 
@@ -2791,9 +2975,5 @@ Implementation
 ويجب إضافة مراجع ADR الفعلية إلى هذا القسم عند إنشاء القرارات واعتمادها.
 
 ```
-
-كده يا برنس **أكملنا من 21 إلى 26**، وبذلك أصبح لدينا الهيكل الكامل للـ`ARCHITECTURE.md` من **1 إلى 26**.
-
-وفي رأيي فيه **خطوة أخيرة مهمة جدًا قبل ما نقول الملف خلص**: بعد ما تضيف هذه الأقسام، نعمل مراجعة شاملة للملف كله مرة واحدة، خصوصًا لاكتشاف **التكرار والتعارض بين الأقسام**، ثم نُحدّث الـ`Table of Contents` ليعكس الـ26 قسمًا بالكامل.
 ```
 ````

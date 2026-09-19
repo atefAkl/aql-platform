@@ -41,12 +41,13 @@ class AuthTest extends TestCase
 
     public function test_valid_user_login_succeeds_and_regenerates_session()
     {
-        $response = $this->post('/login', [
+        $domain = $this->tenantId . '.localhost';
+        $response = $this->post("http://{$domain}/login", [
             'email' => "admin@{$this->tenantId}.com",
             'password' => 'password123',
         ]);
 
-        $response->assertRedirect('/users');
+        $response->assertRedirect("http://{$domain}/users");
         $this->assertAuthenticated();
 
         // Verify selective audit log for AUTH_LOGIN
@@ -59,7 +60,8 @@ class AuthTest extends TestCase
 
     public function test_invalid_password_login_fails()
     {
-        $response = $this->post('/login', [
+        $domain = $this->tenantId . '.localhost';
+        $response = $this->post("http://{$domain}/login", [
             'email' => "admin@{$this->tenantId}.com",
             'password' => 'wrong-password',
         ]);
@@ -70,7 +72,8 @@ class AuthTest extends TestCase
 
     public function test_unknown_user_login_fails()
     {
-        $response = $this->post('/login', [
+        $domain = $this->tenantId . '.localhost';
+        $response = $this->post("http://{$domain}/login", [
             'email' => "nonexistent@{$this->tenantId}.com",
             'password' => 'password123',
         ]);
@@ -81,8 +84,9 @@ class AuthTest extends TestCase
 
     public function test_logout_terminates_session_and_records_audit_log()
     {
+        $domain = $this->tenantId . '.localhost';
         // Login first
-        $this->post('/login', [
+        $this->post("http://{$domain}/login", [
             'email' => "admin@{$this->tenantId}.com",
             'password' => 'password123',
         ]);
@@ -90,9 +94,9 @@ class AuthTest extends TestCase
         $this->assertAuthenticated();
 
         // Perform logout
-        $response = $this->post('/logout');
+        $response = $this->post("http://{$domain}/logout");
 
-        $response->assertRedirect('/login');
+        $response->assertRedirect("http://{$domain}/login");
         $this->assertGuest();
 
         // Verify selective audit log for AUTH_LOGOUT

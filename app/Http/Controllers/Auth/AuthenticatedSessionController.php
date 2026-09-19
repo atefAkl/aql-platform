@@ -33,38 +33,6 @@ class AuthenticatedSessionController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        $email = $credentials['email'];
-
-        // Verify if current tenant database contains the requested user
-        $userExistsInCurrentTenant = (function_exists('tenant') && tenant())
-            ? User::where('email', $email)->exists()
-            : false;
-
-        // If user is not in current tenant DB, search across active tenants
-        if (! $userExistsInCurrentTenant) {
-            $tenants = Tenant::where('status', 'active')->get();
-            $targetTenant = null;
-
-            foreach ($tenants as $t) {
-                $exists = $t->run(function () use ($email) {
-                    return User::where('email', $email)->exists();
-                });
-
-                if ($exists) {
-                    $targetTenant = $t;
-                    break;
-                }
-            }
-
-            if ($targetTenant) {
-                if (function_exists('tenant') && tenant()) {
-                    tenancy()->end();
-                }
-                tenancy()->initialize($targetTenant);
-                $request->session()->put('tenant_id', $targetTenant->id);
-            }
-        }
-
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             return back()->withErrors([
                 'email' => 'بيانات الدخول غير صحيحة، يرجى التأكد من البريد وكلمة المرور.',
@@ -72,9 +40,6 @@ class AuthenticatedSessionController extends Controller
         }
 
         $request->session()->regenerate();
-        if (function_exists('tenant') && tenant()) {
-            $request->session()->put('tenant_id', tenant('id'));
-        }
 
         // Selective Audit Log for Security-Sensitive Login Event
         AuditLogService::record(

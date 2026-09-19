@@ -33,7 +33,7 @@ class OnboardingController extends Controller
     /**
      * Handle tenant registration & provisioning submission.
      */
-    public function store(Request $request, TenantProvisioningService $provisioningService)
+    public function store(Request $request)
     {
         if (function_exists('tenant') && tenant()) {
             tenancy()->end();
@@ -48,8 +48,8 @@ class OnboardingController extends Controller
                 'max:50',
                 function ($attribute, $value, $fail) {
                     $slug = Str::slug($value);
-                    if (Tenant::on('pgsql')->where('id', $slug)->exists()) {
-                        $fail('المعرف الفريد للمؤسسة مستخدم بالفعل، يرجى اختيار معرف آخر.');
+                    if (Tenant::on('pgsql')->where('id', $slug)->exists() || \App\Models\RegistrationRequest::where('slug', $slug)->exists()) {
+                        $fail('المعرف الفريد للمؤسسة مستخدم بالفعل أو قيد المراجعة، يرجى اختيار معرف آخر.');
                     }
                 },
             ],
@@ -77,36 +77,18 @@ class OnboardingController extends Controller
         }
 
         try {
-            $randomPassword = Str::random(16);
-            $result = $provisioningService->createTenant(
-                $slug,
-                $validated['organization_name'],
-                $validated['admin_name'],
-                $validated['admin_email'],
-                $randomPassword,
-                $domainName
-            );
+            \App\Models\RegistrationRequest::create([
+                'organization_name' => $validated['organization_name'],
+                'slug' => $slug,
+                'admin_name' => $validated['admin_name'],
+                'admin_email' => $validated['admin_email'],
+                'status' => 'pending',
+            ]);
 
-            /** @var Tenant $tenant */
-            $tenant = $result['tenant'];
-            /** @var \App\Models\User $adminUser */
-            $adminUser = $result['admin_user'];
-
-            // Initialize tenancy context & establish authenticated admin session
-            if (function_exists('tenant') && tenant()) {
-                tenancy()->end();
-            }
-            tenancy()->initialize($tenant);
-
-            $request->session()->put('tenant_id', $tenant->id);
-
-            Auth::login($adminUser);
-            $request->session()->regenerate();
-
-            return redirect()->route('users.index')->with('success', "تم إنشاء وتجهيز بيئة مؤسسة ({$tenant->name}) بنجاح! مرحباً بك.");
+            return redirect()->route('onboarding')->with('success', "تم إرسال طلب التسجيل بنجاح! طلبك الآن قيد المراجعة.");
         } catch (\Throwable $e) {
             return back()->withErrors([
-                'organization_name' => 'تعذر إكمال عملية التجهيز: ' . $e->getMessage(),
+                'organization_name' => 'تعذر إرسال الطلب: ' . $e->getMessage(),
             ]);
         }
     }

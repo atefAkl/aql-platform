@@ -42,20 +42,22 @@ class AuthorizationTest extends TestCase
 
     public function test_authorized_user_can_access_permitted_routes()
     {
-        $this->post('/login', [
+        $domain = $this->tenantId . '.localhost';
+        $this->post("http://{$domain}/login", [
             'email' => "admin@{$this->tenantId}.com",
             'password' => 'password123',
         ]);
 
-        $response = $this->get('/users');
+        $response = $this->get("http://{$domain}/users");
         $response->assertStatus(200);
 
-        $auditResponse = $this->get('/audit');
+        $auditResponse = $this->get("http://{$domain}/audit");
         $auditResponse->assertStatus(200);
     }
 
     public function test_unauthorized_user_is_denied_access()
     {
+        $domain = $this->tenantId . '.localhost';
         // Create a user with NO permissions
         $restrictedUser = null;
         $this->tenant->run(function () use (&$restrictedUser) {
@@ -69,15 +71,15 @@ class AuthorizationTest extends TestCase
         });
 
         // Login as restricted user
-        $this->post('/login', [
+        $this->post("http://{$domain}/login", [
             'email' => "restricted@{$this->tenantId}.com",
             'password' => 'password123',
         ]);
 
-        $response = $this->get('/users');
+        $response = $this->get("http://{$domain}/users");
         $response->assertStatus(403);
 
-        $auditResponse = $this->get('/audit');
+        $auditResponse = $this->get("http://{$domain}/audit");
         $auditResponse->assertStatus(403);
     }
 

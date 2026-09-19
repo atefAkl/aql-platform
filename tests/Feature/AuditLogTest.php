@@ -43,6 +43,7 @@ class AuditLogTest extends TestCase
 
     public function test_audit_log_records_tenant_provisioning_and_user_creation()
     {
+        $domain = $this->tenantId . '.localhost';
         // 1. Verify TENANT_PROVISIONED event
         $this->tenant->run(function () {
             $log = AuditLog::where('action', 'TENANT_PROVISIONED')->first();
@@ -51,7 +52,7 @@ class AuditLogTest extends TestCase
         });
 
         // 2. Login as Admin and Create a User
-        $this->post('/login', [
+        $this->post("http://{$domain}/login", [
             'email' => "admin@{$this->tenantId}.com",
             'password' => 'password123',
         ]);
@@ -61,7 +62,7 @@ class AuditLogTest extends TestCase
             $role = Role::where('code', 'staff')->first();
         });
 
-        $this->post('/users', [
+        $this->post("http://{$domain}/users", [
             'name' => 'جديد موظف',
             'email' => "newuser@{$this->tenantId}.com",
             'password' => 'password123',
@@ -79,7 +80,8 @@ class AuditLogTest extends TestCase
 
     public function test_audit_log_records_permissions_updated_event()
     {
-        $this->post('/login', [
+        $domain = $this->tenantId . '.localhost';
+        $this->post("http://{$domain}/login", [
             'email' => "admin@{$this->tenantId}.com",
             'password' => 'password123',
         ]);
@@ -92,7 +94,7 @@ class AuditLogTest extends TestCase
         });
 
         // Update permissions for admin
-        $this->post("/users/{$adminUser->id}/permissions", [
+        $this->post("http://{$domain}/users/{$adminUser->id}/permissions", [
             'permission_ids' => [$permId],
         ]);
 

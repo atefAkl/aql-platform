@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Head, useForm, Link } from '@inertiajs/react';
+import { Head, useForm, Link, usePage } from '@inertiajs/react';
 import { Building2, ShieldCheck, User, Mail, Lock, Eye, EyeOff, Sun, Moon, ArrowRight, Loader2 } from 'lucide-react';
 
 export default function Onboarding({ central_domain }: { central_domain: string }) {
@@ -24,9 +24,9 @@ export default function Onboarding({ central_domain }: { central_domain: string 
         slug: '',
         admin_name: '',
         admin_email: '',
-        password: '',
-        password_confirmation: '',
     });
+
+    const { flash } = usePage<any>().props;
 
     const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -84,9 +84,15 @@ export default function Onboarding({ central_domain }: { central_domain: string 
                         </div>
                         <h2 className="text-2xl font-bold tracking-tight">تأسيس وتجهيز مؤسسة جديدة</h2>
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                            قم بإدخال بيانات مؤسستك لتجهيز بيئتك المعزولة والمستقلة على المنصة في ثوانٍ
+                            قم بإدخال بيانات مؤسستك لطلب تسجيل بيئتك المعزولة والمستقلة على المنصة
                         </p>
                     </div>
+
+                    {flash?.success && (
+                        <div className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 p-4 rounded-xl text-sm font-medium border border-emerald-200 dark:border-emerald-800">
+                            {flash.success}
+                        </div>
+                    )}
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                         {/* Section 1: Organization Details */}
@@ -192,12 +198,12 @@ export default function Onboarding({ central_domain }: { central_domain: string 
                             {processing ? (
                                 <>
                                     <Loader2 className="w-5 h-5 animate-spin" />
-                                    جاري إنشاء وتجهيز بيئة المؤسسة...
+                                    جاري إرسال الطلب...
                                 </>
                             ) : (
                                 <>
                                     <Building2 className="w-5 h-5" />
-                                    إنشاء المؤسسة والدخول للمنصة
+                                    إرسال طلب التسجيل
                                 </>
                             )}
                         </button>

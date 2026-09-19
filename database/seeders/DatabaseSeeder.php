@@ -27,5 +27,14 @@ class DatabaseSeeder extends Seeder
                 'acme.localhost'
             );
         }
+
+        // Seed Platform Admin
+        if (\App\Models\PlatformUser::count() === 0) {
+            \App\Models\PlatformUser::create([
+                'name' => 'مدير المنصة',
+                'email' => 'admin@platform.local',
+                'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+            ]);
+        }
     }
 }

@@ -36,23 +36,16 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        // Auto-initialize Tenancy from Session if not initialized
-        if ((! function_exists('tenant') || ! tenant()) && $request->session()->has('tenant_id')) {
-            $tenantId = $request->session()->get('tenant_id');
-            $tenant = Tenant::find($tenantId);
-            if ($tenant) {
-                tenancy()->initialize($tenant);
-            }
-        }
-
         return array_merge(parent::share($request), [
             'auth' => [
                 'user' => $request->user() ? [
                     'id' => $request->user()->id,
                     'name' => $request->user()->name,
                     'email' => $request->user()->email,
-                    'role_title' => $request->user()->role_title,
-                    'permissions' => $request->user()->permissions->pluck('code'),
+                    'role_title' => $request->user()->role_title ?? 'Platform Admin',
+                    'permissions' => method_exists($request->user(), 'permissions') && $request->user()->permissions
+                        ? $request->user()->permissions->pluck('code')
+                        : [],
                 ] : null,
             ],
             'tenant' => function () {

@@ -35,36 +35,28 @@ class Sprint2OnboardingTest extends TestCase
     }
 
     /**
-     * Test 2 — First Tenant Can Be Created
+     * Test 2 — POST /onboarding creates a pending RegistrationRequest in Landlord DB
      */
-    public function test_2_first_tenant_can_be_created()
+    public function test_2_onboarding_creates_registration_request()
     {
         $response = $this->post('/onboarding', [
-            'organization_name' => 'شركة الأفق الرقمية',
-            'slug' => 'alafaq-tech',
-            'admin_name' => 'طارق عبد المحسن',
-            'admin_email' => 'admin@alafaq.com',
-            'password' => 'Password123!',
-            'password_confirmation' => 'Password123!',
+            'organization_name' => 'شركة الابتكار',
+            'slug' => 'test-corp',
+            'admin_name' => 'أحمد محمد',
+            'admin_email' => 'ahmed@testcorp.com',
         ]);
 
-        $response->assertRedirect('/users');
-
-        $this->assertDatabaseHas('tenants', [
-            'id' => 'alafaq-tech',
-            'name' => 'شركة الأفق الرقمية',
-        ], 'pgsql');
-
-        $this->assertDatabaseHas('domains', [
-            'tenant_id' => 'alafaq-tech',
-            'domain' => 'alafaq-tech.localhost',
+        $response->assertSessionHasNoErrors();
+        $response->assertRedirect('/onboarding');
+        
+        $this->assertDatabaseHas('registration_requests', [
+            'slug' => 'test-corp',
+            'status' => 'pending',
+            'admin_email' => 'ahmed@testcorp.com',
         ], 'pgsql');
 
         // Cleanup
-        if (function_exists('tenant') && tenant()) {
-            tenancy()->end();
-        }
-        Tenant::find('alafaq-tech')?->delete();
+        \App\Models\RegistrationRequest::where('slug', 'test-corp')->delete();
     }
 
     /**
@@ -163,31 +155,24 @@ class Sprint2OnboardingTest extends TestCase
     }
 
     /**
-     * Test 6 — Registration Creates an Authenticated Tenant Session
+     * Test 6 — Registration Request Shows Pending Approval Message
      */
-    public function test_6_registration_creates_an_authenticated_tenant_session()
+    public function test_6_registration_shows_pending_message()
     {
         $response = $this->post('/onboarding', [
-            'organization_name' => 'شركة الجلسة التلقائية',
-            'slug' => 'autosess-corp',
+            'organization_name' => 'شركة الطلب المعلق',
+            'slug' => 'pending-corp',
             'admin_name' => 'ماجد ناصر',
-            'admin_email' => 'majed@autosess.com',
-            'password' => 'Password123!',
-            'password_confirmation' => 'Password123!',
+            'admin_email' => 'majed@pending.com',
         ]);
 
-        $response->assertRedirect('/users');
-        $this->assertAuthenticated();
+        $response->assertRedirect('/onboarding');
+        $response->assertSessionHas('success', 'تم إرسال طلب التسجيل بنجاح! طلبك الآن قيد المراجعة.');
 
-        // Access protected platform route immediately
-        $userResponse = $this->get('/users');
-        $userResponse->assertStatus(200);
+        $this->assertEquals(1, \App\Models\RegistrationRequest::where('slug', 'pending-corp')->count());
 
         // Cleanup
-        if (function_exists('tenant') && tenant()) {
-            tenancy()->end();
-        }
-        Tenant::find('autosess-corp')?->delete();
+        \App\Models\RegistrationRequest::where('slug', 'pending-corp')->delete();
     }
 
     /**
@@ -206,8 +191,8 @@ class Sprint2OnboardingTest extends TestCase
             tenancy()->end();
         }
 
-        $response = $this->get('/login');
-        $response->assertStatus(200);
+        $response = $this->get('/');
+        $response->assertRedirect('/onboarding');
         $this->assertNull(tenant(), 'System MUST NOT select first active tenant when no tenant context exists.');
 
 
@@ -226,8 +211,6 @@ class Sprint2OnboardingTest extends TestCase
             'slug' => 'unique-slug',
             'admin_name' => 'علي حسن',
             'admin_email' => 'ali@first.com',
-            'password' => 'Password123!',
-            'password_confirmation' => 'Password123!',
         ]);
 
         // Attempt second registration with same slug
@@ -236,18 +219,13 @@ class Sprint2OnboardingTest extends TestCase
             'slug' => 'unique-slug',
             'admin_name' => 'حسن علي',
             'admin_email' => 'hassan@second.com',
-            'password' => 'Password123!',
-            'password_confirmation' => 'Password123!',
         ]);
 
         $secondResponse->assertSessionHasErrors('slug');
-        $this->assertEquals(1, Tenant::where('id', 'unique-slug')->count());
+        $this->assertEquals(1, \App\Models\RegistrationRequest::where('slug', 'unique-slug')->count());
 
         // Cleanup
-        if (function_exists('tenant') && tenant()) {
-            tenancy()->end();
-        }
-        Tenant::find('unique-slug')?->delete();
+        \App\Models\RegistrationRequest::where('slug', 'unique-slug')->delete();
     }
 
     /**
@@ -289,8 +267,11 @@ class Sprint2OnboardingTest extends TestCase
             $this->assertNull($userB, 'Tenant A DB MUST NOT see Tenant B admin user');
         });
 
+        $domainB = 'http://' . $tenantB->domains->first()->domain;
+
         // 2. HTTP Authorization Isolation: Login as Tenant B user and attempt access without Tenant A permissions
-        $this->post('/login', [
+        // Note: Login now requires domain
+        $this->post($domainB . '/login', [
             'email' => 'admin@iso-b.com',
             'password' => 'Password123!',
         ]);
@@ -307,13 +288,13 @@ class Sprint2OnboardingTest extends TestCase
             ]);
         });
 
-        $this->post('/login', [
+        $this->post($domainB . '/login', [
             'email' => 'restricted@iso-b.com',
             'password' => 'Password123!',
         ]);
 
         // Accessing protected route without permission yields HTTP 403
-        $forbiddenResponse = $this->get('/users');
+        $forbiddenResponse = $this->get($domainB . '/users');
         $forbiddenResponse->assertStatus(403);
 
         // Cleanup
@@ -370,5 +351,76 @@ class Sprint2OnboardingTest extends TestCase
             tenancy()->end();
         }
         $tenant->delete();
+    }
+
+    /**
+     * Test 13 — Platform Admin can approve a registration request and generate activation token
+     */
+    public function test_13_platform_admin_can_approve_registration_request()
+    {
+        $slug = 'approve-corp-' . strtolower(\Illuminate\Support\Str::random(5));
+        $request = \App\Models\RegistrationRequest::create([
+            'organization_name' => 'شركة الاعتماد',
+            'slug' => $slug,
+            'admin_name' => 'سالم',
+            'admin_email' => 'salem@approve.com',
+            'status' => 'pending',
+        ]);
+
+        // Platform User authentication context
+        $platformAdmin = \App\Models\PlatformUser::factory()->create();
+        
+        $this->withoutExceptionHandling();
+        $response = $this->actingAs($platformAdmin, 'platform')->post('/admin/requests/' . $request->id . '/approve');
+        
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $request->refresh();
+        $this->assertEquals('approved', $request->status);
+        $this->assertNotNull($request->activation_token);
+        $this->assertNotNull($request->token_expires_at);
+
+        // Cleanup
+        $request->delete();
+        $platformAdmin->delete();
+    }
+
+    /**
+     * Test 14 — Activation Token Provisions Tenant and Redirects
+     */
+    public function test_14_activation_token_provisions_tenant()
+    {
+        $slug = 'activate-corp-' . strtolower(\Illuminate\Support\Str::random(5));
+        $token = \Illuminate\Support\Str::random(64);
+        $request = \App\Models\RegistrationRequest::create([
+            'organization_name' => 'شركة التفعيل',
+            'slug' => $slug,
+            'admin_name' => 'نادر',
+            'admin_email' => 'nader@activate.com',
+            'status' => 'approved',
+            'activation_token' => $token,
+            'token_expires_at' => now()->addDays(1),
+        ]);
+
+        $response = $this->post('/activation/' . $token, [
+            'password' => 'SecurePass123!',
+            'password_confirmation' => 'SecurePass123!',
+        ]);
+
+        $centralDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
+        $response->assertRedirect('http://' . $slug . '.' . $centralDomain . '/login');
+        
+        $request->refresh();
+        $this->assertEquals('provisioned', $request->status);
+        $this->assertNull($request->activation_token);
+
+        $this->assertDatabaseHas('tenants', [
+            'id' => $slug,
+        ], 'pgsql');
+
+        // Cleanup
+        Tenant::find($slug)?->delete();
+        $request->delete();
     }
 }
