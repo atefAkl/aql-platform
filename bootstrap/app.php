@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\CheckModuleAvailability;
+use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\InitializeTenancyIfTenantDomain;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,12 +15,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->web(append: [
-            \App\Http\Middleware\HandleInertiaRequests::class,
+        $middleware->web(prepend: [
+            InitializeTenancyIfTenantDomain::class,
         ]);
-        
+
+        $middleware->web(append: [
+            HandleInertiaRequests::class,
+        ]);
+
         $middleware->alias([
-            'module' => \App\Http\Middleware\CheckModuleAvailability::class,
+            'module' => CheckModuleAvailability::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
