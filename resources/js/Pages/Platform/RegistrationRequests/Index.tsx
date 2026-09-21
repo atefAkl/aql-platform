@@ -100,20 +100,10 @@ export default function RegistrationRequestsIndex({ requests, currentFilter = 'a
                             عرض وإدارة وتفعيل أو تعطيل طلبات التسجيل المقدمة للإنضمام إلى منصة AQL Platform
                         </p>
                     </div>
-
-                    <div className="flex items-center gap-3">
-                        <Button 
-                            variant="primary" 
-                            size="sm" 
-                            onClick={() => router.get('/onboarding')}
-                        >
-                            <Plus className="w-4 h-4" />
-                            <span>طلب تسجيل جديد</span>
-                        </Button>
-                    </div>
                 </div>
 
-                {/* Stat Overview Cards */}
+                {/* Stat Overview Cards (Temporarily Hidden per Request) */}
+                {/* 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <StatCard 
                         title="إجمالي الطلبات"
@@ -150,6 +140,7 @@ export default function RegistrationRequestsIndex({ requests, currentFilter = 'a
                         subtext="مرفوضة نهائياً"
                     />
                 </div>
+                */}
 
                 {/* Filter Tabs & Search Bar */}
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm space-y-4">
@@ -245,6 +236,7 @@ export default function RegistrationRequestsIndex({ requests, currentFilter = 'a
                                                     }}
                                                     onApprove={req.status === 'pending' ? () => setConfirmAction({ type: 'approve', request: req }) : undefined}
                                                     onReject={req.status === 'pending' ? () => setConfirmAction({ type: 'reject', request: req }) : undefined}
+                                                    onDelete={() => setConfirmAction({ type: 'delete', request: req })}
                                                 />
                                             </td>
                                         </tr>
@@ -275,19 +267,19 @@ export default function RegistrationRequestsIndex({ requests, currentFilter = 'a
                     title={
                         confirmAction.type === 'approve' ? 'تأكيد اعتماد وتفعيل الطلب' :
                         confirmAction.type === 'reject' ? 'تأكيد رفض الطلب' :
-                        'تأكيد الإجراء'
+                        'تأكيد حذف طلب التسجيل'
                     }
                     description={
                         confirmAction.type === 'approve' ? `هل أنت متأكد من موافقتك على طلب تسجيل مؤسسة (${confirmAction.request.organization_name}) وتوليد رابط التفعيل؟` :
                         confirmAction.type === 'reject' ? `هل تريد حقاً رفض طلب تسجيل مؤسسة (${confirmAction.request.organization_name})؟ هذا الإجراء نهائي ولا يمكن التراجع عنه.` :
-                        `تأكيد الإجراء`
+                        `هل أنت متأكد من حذف طلب تسجيل مؤسسة (${confirmAction.request.organization_name})؟ سيتم مسح الطلب وسجل المؤسسة المرتبط به نهائياً.`
                     }
                     confirmText={
                         confirmAction.type === 'approve' ? 'نعم، اعتماد الطلب' :
                         confirmAction.type === 'reject' ? 'نعم، رفض الطلب' :
-                        'تأكيد'
+                        'نعم، حذف الطلب'
                     }
-                    variant={confirmAction.type === 'reject' ? 'danger' : 'primary'}
+                    variant={confirmAction.type === 'approve' ? 'primary' : 'danger'}
                 />
             )}
         </PlatformLayout>

@@ -3,8 +3,10 @@
 use App\Http\Controllers\Auth\ActivationController;
 use App\Http\Controllers\Auth\OnboardingController;
 use App\Http\Controllers\Auth\UnifiedLoginController;
+use App\Http\Controllers\Platform\ChangelogController;
 use App\Http\Controllers\Platform\DashboardController;
 use App\Http\Controllers\Platform\RegistrationRequestController;
+use App\Http\Controllers\Platform\TenantLifecycleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,11 +16,19 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// Root Domain Dispatcher (Central -> /onboarding | Tenant -> /login)
+// Root Domain Dispatcher (Central -> /admin/dashboard or /onboarding | Tenant -> /users or /login)
 Route::get('/', function (Request $request) {
     $centralDomains = config('tenancy.central_domains', []);
     if (in_array($request->getHost(), $centralDomains, true)) {
+        if (auth('platform')->check()) {
+            return redirect()->route('platform.dashboard');
+        }
+
         return redirect('/onboarding');
+    }
+
+    if (auth('web')->check()) {
+        return redirect()->route('users.index');
     }
 
     return redirect('/login');
@@ -29,6 +39,10 @@ Route::get('/onboarding', function (Request $request) {
     $centralDomains = config('tenancy.central_domains', []);
     if (! in_array($request->getHost(), $centralDomains, true)) {
         return redirect('/login');
+    }
+
+    if (auth('platform')->check()) {
+        return redirect()->route('platform.dashboard');
     }
 
     return app(OnboardingController::class)->create();
@@ -48,9 +62,25 @@ Route::get('/activation/{token}', [ActivationController::class, 'show'])->name('
 Route::post('/activation/{token}', [ActivationController::class, 'store'])->name('activation.store');
 
 // Unified Domain-Aware Authentication Routes (Central -> Platform Admin Login | Tenant -> Workspace Login)
-Route::get('/login', [UnifiedLoginController::class, 'create'])->name('login');
+Route::get('/login', function (Request $request) {
+    $centralDomains = config('tenancy.central_domains', []);
+    if (in_array($request->getHost(), $centralDomains, true)) {
+        if (auth('platform')->check()) {
+            return redirect()->route('platform.dashboard');
+        }
+    } else {
+        if (auth('web')->check()) {
+            return redirect()->route('users.index');
+        }
+    }
+
+    return app(UnifiedLoginController::class)->create($request);
+})->name('login');
 Route::post('/login', [UnifiedLoginController::class, 'store']);
 Route::post('/logout', [UnifiedLoginController::class, 'destroy'])->name('logout');
+
+// Public Platform Release History / Changelog Route (Central Domain Only)
+Route::get('/changelog', [ChangelogController::class, 'index'])->name('platform.changelog');
 
 // Platform Administration Routes (Landlord Admin Only)
 Route::prefix('admin')->group(function () {
@@ -61,10 +91,11 @@ Route::prefix('admin')->group(function () {
         Route::post('/requests/{registrationRequest}/reject', [RegistrationRequestController::class, 'reject'])->name('platform.requests.reject');
         Route::delete('/requests/{registrationRequest}', [RegistrationRequestController::class, 'destroy'])->name('platform.requests.destroy');
 
-        // Tenant Management Routes
-        Route::post('/tenants/{tenant}/suspend', [\App\Http\Controllers\Platform\TenantLifecycleController::class, 'suspend'])->name('platform.tenants.suspend');
-        Route::post('/tenants/{tenant}/archive', [\App\Http\Controllers\Platform\TenantLifecycleController::class, 'archive'])->name('platform.tenants.archive');
-        Route::post('/tenants/{tenant}/restore', [\App\Http\Controllers\Platform\TenantLifecycleController::class, 'restore'])->name('platform.tenants.restore');
+        // Tenant Accounts Management Routes
+        Route::get('/tenants', [TenantLifecycleController::class, 'index'])->name('platform.tenants.index');
+        Route::post('/tenants/{tenant}/suspend', [TenantLifecycleController::class, 'suspend'])->name('platform.tenants.suspend');
+        Route::post('/tenants/{tenant}/archive', [TenantLifecycleController::class, 'archive'])->name('platform.tenants.archive');
+        Route::post('/tenants/{tenant}/restore', [TenantLifecycleController::class, 'restore'])->name('platform.tenants.restore');
+        Route::delete('/tenants/{tenant}', [TenantLifecycleController::class, 'destroy'])->name('platform.tenants.destroy');
     });
 });
-
