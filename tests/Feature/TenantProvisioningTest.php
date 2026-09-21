@@ -77,7 +77,6 @@ class TenantProvisioningTest extends TestCase
         if (function_exists('tenant') && tenant()) {
             tenancy()->end();
         }
-        dispatch_sync(new DeleteDatabase($tenant));
         $tenant->delete();
     }
 }

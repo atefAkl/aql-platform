@@ -12,10 +12,11 @@ class TenantLifecycleContractTest extends TestCase
 {
     public function test_tenant_db_is_not_created_at_approval()
     {
+        $slug = 'approval-corp-' . strtolower(\Illuminate\Support\Str::random(5));
         // 1. Create a PENDING request
         $request = RegistrationRequest::create([
             'organization_name' => 'Approval Corp',
-            'slug' => 'approval-corp',
+            'slug' => $slug,
             'admin_name' => 'Admin',
             'admin_email' => 'admin@approval.com',
             'status' => 'pending',
@@ -37,26 +38,27 @@ class TenantLifecycleContractTest extends TestCase
         });
 
         $this->assertDatabaseHas('tenants', [
-            'id' => 'approval-corp',
+            'id' => $slug,
             'status' => null,
         ], 'pgsql');
 
         // 3. Verify no DB was created
         // Connect to postgres and check if db exists
-        $dbName = config('tenancy.database.prefix') . 'approval-corp';
+        $dbName = config('tenancy.database.prefix') . $slug;
         $dbExists = DB::connection('pgsql')->select("SELECT datname FROM pg_catalog.pg_database WHERE datname = ?", [$dbName]);
         
         $this->assertEmpty($dbExists, "Tenant DB should NOT be created at approval.");
         
         // Teardown
-        Tenant::withoutEvents(function () {
-            Tenant::find('approval-corp')?->delete();
+        Tenant::withoutEvents(function () use ($slug) {
+            Tenant::find($slug)?->delete();
         });
+        $request->delete();
     }
 
     public function test_provisioning_failure_allows_retry_and_preserves_state()
     {
-        $tenantId = 'fail-corp';
+        $tenantId = 'fail-corp-' . strtolower(\Illuminate\Support\Str::random(5));
         
         $request = RegistrationRequest::create([
             'organization_name' => 'Fail Corp',
