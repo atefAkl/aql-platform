@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal } from '../Atoms/Modal';
 import { Badge } from '../Atoms/Badge';
 import { Button } from '../Atoms/Button';
-import { Building2, User, Mail, Globe, Calendar, Key, CheckCircle, PauseCircle, Trash2 } from 'lucide-react';
+import { Building2, User, Mail, Globe, Calendar, Key, CheckCircle, Ban, Trash2 } from 'lucide-react';
 
 export interface RegistrationRequestData {
     id: number;
@@ -10,7 +10,7 @@ export interface RegistrationRequestData {
     slug: string;
     admin_name: string;
     admin_email: string;
-    status: 'pending' | 'approved' | 'suspended' | 'provisioned';
+    status: 'pending' | 'approved' | 'completed' | 'rejected';
     activation_token?: string | null;
     token_expires_at?: string | null;
     created_at: string;
@@ -21,7 +21,7 @@ export interface RegistrationRequestDetailsModalProps {
     onClose: () => void;
     request: RegistrationRequestData | null;
     onApprove?: (req: RegistrationRequestData) => void;
-    onSuspend?: (req: RegistrationRequestData) => void;
+    onReject?: (req: RegistrationRequestData) => void;
     onDelete?: (req: RegistrationRequestData) => void;
 }
 
@@ -30,7 +30,7 @@ export const RegistrationRequestDetailsModal: React.FC<RegistrationRequestDetail
     onClose,
     request,
     onApprove,
-    onSuspend,
+    onReject,
     onDelete,
 }) => {
     if (!request) return null;
@@ -53,7 +53,7 @@ export const RegistrationRequestDetailsModal: React.FC<RegistrationRequestDetail
                         </div>
                     </div>
                     <Badge variant={request.status}>
-                        {request.status === 'pending' ? 'قيد الانتظار' : request.status === 'approved' ? 'معتمد / بانتظار التفعيل' : request.status === 'provisioned' ? 'مفعل' : 'معطل مؤقتاً'}
+                        {request.status === 'pending' ? 'قيد الانتظار' : request.status === 'approved' ? 'معتمد / بانتظار التفعيل' : request.status === 'completed' ? 'مكتمل' : 'مرفوض'}
                     </Badge>
                 </div>
 
@@ -114,10 +114,10 @@ export const RegistrationRequestDetailsModal: React.FC<RegistrationRequestDetail
                                 <span>اعتماد وتفعيل</span>
                             </Button>
                         )}
-                        {onSuspend && (
-                            <Button variant="warning" size="sm" onClick={() => { onClose(); onSuspend(request); }}>
-                                <PauseCircle className="w-4 h-4" />
-                                <span>{request.status === 'suspended' ? 'إلغاء التعليق' : 'إيقاف / تعطيل مؤقت'}</span>
+                        {onReject && request.status === 'pending' && (
+                            <Button variant="danger" size="sm" onClick={() => { onClose(); onReject(request); }}>
+                                <Ban className="w-4 h-4" />
+                                <span>رفض الطلب</span>
                             </Button>
                         )}
                     </div>
@@ -138,3 +138,4 @@ export const RegistrationRequestDetailsModal: React.FC<RegistrationRequestDetail
         </Modal>
     );
 };
+

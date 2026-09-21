@@ -58,7 +58,13 @@ Route::prefix('admin')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('platform.dashboard');
         Route::get('/requests', [RegistrationRequestController::class, 'index'])->name('platform.requests.index');
         Route::post('/requests/{registrationRequest}/approve', [RegistrationRequestController::class, 'approve'])->name('platform.requests.approve');
-        Route::post('/requests/{registrationRequest}/suspend', [RegistrationRequestController::class, 'suspend'])->name('platform.requests.suspend');
+        Route::post('/requests/{registrationRequest}/reject', [RegistrationRequestController::class, 'reject'])->name('platform.requests.reject');
         Route::delete('/requests/{registrationRequest}', [RegistrationRequestController::class, 'destroy'])->name('platform.requests.destroy');
+
+        // Tenant Management Routes
+        Route::post('/tenants/{tenant}/suspend', [\App\Http\Controllers\Platform\TenantLifecycleController::class, 'suspend'])->name('platform.tenants.suspend');
+        Route::post('/tenants/{tenant}/archive', [\App\Http\Controllers\Platform\TenantLifecycleController::class, 'archive'])->name('platform.tenants.archive');
+        Route::post('/tenants/{tenant}/restore', [\App\Http\Controllers\Platform\TenantLifecycleController::class, 'restore'])->name('platform.tenants.restore');
     });
 });
+

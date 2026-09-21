@@ -11,36 +11,36 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Stancl\Tenancy\Events\TenantCreated;
+use Stancl\Tenancy\Jobs\DeleteDatabase;
 
 class TenantProvisioningService
 {
     /**
-     * Provision a new tenant database, run migrations, and seed initial tenant admin, roles, and permissions.
-     * Implements explicit compensation & cleanup strategy on any provisioning failure.
+     * Provision a tenant database, run migrations, and seed initial tenant admin, roles, and permissions.
+     * Implements explicit compensation & cleanup strategy on any provisioning failure without deleting the Tenant Record.
      *
      * @return array{tenant: Tenant, admin_user: User}
      */
-    public function createTenant(string $id, string $name, string $adminName, string $adminEmail, string $adminPassword, ?string $domain = null): array
+    public function provisionTenant(string $id, string $adminName, string $adminEmail, string $adminPassword, ?string $domain = null): array
     {
         $tenantId = Str::slug($id);
         $centralDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
+        $centralDomain = preg_replace('/^www\./', '', $centralDomain);
         $domainName = $domain ?? ($tenantId.'.'.$centralDomain);
 
-        $tenant = null;
+        $tenant = Tenant::findOrFail($tenantId);
         $adminUser = null;
 
         try {
-            // 1. Create Tenant in Landlord Central DB
-            $tenant = Tenant::create([
-                'id' => $tenantId,
-                'name' => $name,
-                'status' => 'active',
-            ]);
-
-            // 2. Create Domain mapping
-            $tenant->domains()->create([
+            // 1. Create Domain mapping
+            $tenant->domains()->firstOrCreate([
                 'domain' => $domainName,
             ]);
+
+            // 2. Dispatch event to create and migrate database
+            // This natively triggers the JobPipeline (CreateDatabase, MigrateDatabase)
+            event(new TenantCreated($tenant));
 
             // 3. Initialize Tenancy Context & Seed Initial Database Data inside Tenant DB
             $tenant->run(function () use ($tenant, $adminName, $adminEmail, $adminPassword, &$adminUser) {
@@ -130,7 +130,9 @@ class TenantProvisioningService
                         tenancy()->end();
                     }
                     $tenant->domains()->delete();
-                    $tenant->delete(); // drops PostgreSQL tenant database if created
+                    
+                    // Drop PostgreSQL tenant database if created, but keep the Tenant Record in Landlord DB
+                    dispatch_sync(new DeleteDatabase($tenant));
                 } catch (\Throwable $cleanupEx) {
                     Log::error("Compensation cleanup error for [{$tenantId}]: ".$cleanupEx->getMessage());
                 }
@@ -140,3 +142,4 @@ class TenantProvisioningService
         }
     }
 }
+

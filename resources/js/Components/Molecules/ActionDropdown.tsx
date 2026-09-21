@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MoreHorizontal, Eye, CheckCircle2, PauseCircle, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Eye, CheckCircle2, PauseCircle, Trash2, Ban } from 'lucide-react';
 
 export interface ActionDropdownProps {
     onView?: () => void;
     onApprove?: () => void;
     onSuspend?: () => void;
+    onReject?: () => void;
     onDelete?: () => void;
     status?: string;
     isApproved?: boolean;
@@ -16,6 +17,7 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({
     onView,
     onApprove,
     onSuspend,
+    onReject,
     onDelete,
     status = 'pending',
     mode = 'horizontal',
@@ -59,6 +61,17 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({
                     </button>
                 )}
 
+                {onReject && status === 'pending' && (
+                    <button
+                        type="button"
+                        onClick={onReject}
+                        className="p-2 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50/70 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/60 transition-all shadow-sm"
+                        title="رفض الطلب"
+                    >
+                        <Ban className="w-4 h-4" />
+                    </button>
+                )}
+
                 {onSuspend && (
                     <button
                         type="button"
@@ -68,7 +81,7 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({
                                 ? 'border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/70 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/60'
                                 : 'border-amber-200 dark:border-amber-900/60 bg-amber-50/70 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/60'
                         }`}
-                        title={status === 'suspended' ? 'إلغاء التعليق واستعادة الطلب' : 'إيقاف / تعطيل مؤقت'}
+                        title={status === 'suspended' ? 'إلغاء التعليق واستعادة' : 'إيقاف / تعطيل مؤقت'}
                     >
                         <PauseCircle className="w-4 h-4" />
                     </button>
@@ -121,6 +134,16 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({
                         </button>
                     )}
 
+                    {onReject && status === 'pending' && (
+                        <button
+                            onClick={() => { setIsOpen(false); onReject(); }}
+                            className="w-full px-3.5 py-2 flex items-center gap-2.5 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                        >
+                            <Ban className="w-4 h-4 text-rose-500" />
+                            <span>رفض الطلب</span>
+                        </button>
+                    )}
+
                     {onSuspend && (
                         <button
                             onClick={() => { setIsOpen(false); onSuspend(); }}
@@ -139,7 +162,7 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({
                             className="w-full px-3.5 py-2 flex items-center gap-2.5 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
                         >
                             <Trash2 className="w-4 h-4 text-rose-500" />
-                            <span>حذف الطلب</span>
+                            <span>حذف</span>
                         </button>
                     )}
                 </div>
@@ -147,3 +170,4 @@ export const ActionDropdown: React.FC<ActionDropdownProps> = ({
         </div>
     );
 };
+

@@ -19,14 +19,16 @@ class Sprint3OperationalValidationTest extends TestCase
         $this->tenantId = 'test-ops-' . strtolower(\Illuminate\Support\Str::random(4));
         
         $service = new TenantProvisioningService();
-        $service->createTenant(
-            $this->tenantId,
-            'Test Ops Corp',
-            'Admin',
-            'admin@testops.local',
-            'password123',
-            $this->tenantId . '.localhost'
-        );
+        \App\Models\Tenant::unsetEventDispatcher();
+        \App\Models\Tenant::firstOrCreate([
+            'id' => $this->tenantId,
+        ], [
+            'name' => 'Test Ops Corp',
+            'status' => null,
+        ]);
+        \App\Models\Tenant::setEventDispatcher(app('events'));
+        $service->provisionTenant($this->tenantId, 'Admin', 'admin@testops.local', 'password123',
+            $this->tenantId . '.localhost');
     }
 
     protected function tearDown(): void
@@ -58,7 +60,15 @@ class Sprint3OperationalValidationTest extends TestCase
         tenancy()->initialize($tenant);
         $user = User::where('email', 'admin@testops.local')->first();
         
+        // GET should be allowed (Read-Only Mode)
         $response = $this->actingAs($user)->get('http://' . $domain . '/users');
+        $response->assertStatus(200);
+
+        // POST should be blocked (No writes)
+        $response = $this->actingAs($user)->post('http://' . $domain . '/users', [
+            'name' => 'Test User',
+            'email' => 'test@test.local',
+        ]);
         $response->assertStatus(403);
         
         tenancy()->end();

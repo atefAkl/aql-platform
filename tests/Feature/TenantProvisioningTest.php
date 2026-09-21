@@ -8,6 +8,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use App\Services\TenantProvisioningService;
 use Tests\TestCase;
+use Stancl\Tenancy\Jobs\DeleteDatabase;
 
 class TenantProvisioningTest extends TestCase
 {
@@ -16,28 +17,41 @@ class TenantProvisioningTest extends TestCase
         $service = new TenantProvisioningService;
 
         $tenantId = 'provcorp'.rand(1000, 9999);
-        $res = $service->createTenant(
+        
+        // 1. Manually create the Tenant record without triggering tenancy DB creation
+        Tenant::withoutEvents(function () use ($tenantId) {
+            Tenant::create([
+                'id' => $tenantId,
+                'name' => 'شركة النشر والتهيئة الكاملة',
+                'status' => null, // Pre-operational condition
+            ]);
+        });
+
+        // 2. Provision Tenant
+        $res = $service->provisionTenant(
             $tenantId,
-            'شركة النشر والتهيئة الكاملة',
             'خالد عبد الرحمن',
             "admin@{$tenantId}.com",
             'password123'
         );
         $tenant = $res['tenant'];
 
-        // 1. Verify Landlord Central DB records
+        // 3. Verify Landlord Central DB records
         $this->assertDatabaseHas('tenants', [
             'id' => $tenantId,
             'name' => 'شركة النشر والتهيئة الكاملة',
+            'status' => null,
         ], 'pgsql');
 
         $centralDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
+        $centralDomain = preg_replace('/^www\./', '', $centralDomain);
+        
         $this->assertDatabaseHas('domains', [
             'tenant_id' => $tenantId,
             'domain' => "{$tenantId}.{$centralDomain}",
         ], 'pgsql');
 
-        // 2. Verify Tenant DB context, migrations, admin user, permissions, and roles
+        // 4. Verify Tenant DB context, migrations, admin user, permissions, and roles
         $tenant->run(function () use ($tenantId) {
             // Admin user verification
             $user = User::where('email', "admin@{$tenantId}.com")->first();
@@ -63,6 +77,8 @@ class TenantProvisioningTest extends TestCase
         if (function_exists('tenant') && tenant()) {
             tenancy()->end();
         }
+        dispatch_sync(new DeleteDatabase($tenant));
         $tenant->delete();
     }
 }
+

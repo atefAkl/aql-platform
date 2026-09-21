@@ -23,14 +23,16 @@ class Sprint3ModuleAvailabilityTest extends TestCase
         $this->domain = $this->tenantId . '.localhost';
         
         $service = new TenantProvisioningService();
-        $service->createTenant(
-            $this->tenantId,
-            'Test Mod Corp',
-            'Admin',
-            'admin@testmod.local',
-            'password123',
-            $this->domain
-        );
+        \App\Models\Tenant::unsetEventDispatcher();
+        \App\Models\Tenant::firstOrCreate([
+            'id' => $this->tenantId,
+        ], [
+            'name' => 'Test Mod Corp',
+            'status' => null,
+        ]);
+        \App\Models\Tenant::setEventDispatcher(app('events'));
+        $service->provisionTenant($this->tenantId, 'Admin', 'admin@testmod.local', 'password123',
+            $this->domain);
 
         // Register the expenses module in Landlord DB
         Module::firstOrCreate(['code' => 'expenses'], [

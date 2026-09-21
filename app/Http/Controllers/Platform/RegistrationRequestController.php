@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Platform;
 use App\Http\Controllers\Controller;
 use App\Mail\RegistrationApprovedMail;
 use App\Models\RegistrationRequest;
+use App\Models\Tenant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -31,7 +32,7 @@ class RegistrationRequestController extends Controller
     }
 
     /**
-     * Approve a pending registration request and issue activation token.
+     * Approve a pending registration request, create Landlord Tenant Record, and issue activation token.
      */
     public function approve(RegistrationRequest $registrationRequest)
     {
@@ -48,48 +49,51 @@ class RegistrationRequestController extends Controller
                 'token_expires_at' => now()->addDays(3),
             ]);
 
+            // Create Tenant Record centrally WITHOUT triggering DB creation or migrations.
+            // status is NULL explicitly as a pre-operational condition.
+            Tenant::withoutEvents(function () use ($registrationRequest) {
+                Tenant::create([
+                    'id' => Str::slug($registrationRequest->slug),
+                    'name' => $registrationRequest->organization_name,
+                    'status' => null,
+                ]);
+            });
+
             // Dispatch Activation Email
             Mail::to($registrationRequest->admin_email)->send(new RegistrationApprovedMail($registrationRequest));
 
-            return back()->with('success', 'تم اعتماد الطلب بنجاح وإرسال رابط التفعيل إلى بريد العميل.');
+            return back()->with('success', 'تم اعتماد الطلب بنجاح وإنشاء سجل المستأجر الأولي وإرسال رابط التفعيل إلى بريد العميل.');
         } catch (\Exception $e) {
             return back()->with('error', 'تعذر اعتماد الطلب: '.$e->getMessage());
         }
     }
 
     /**
-     * Toggle or set status of a registration request to suspended.
+     * Reject a pending registration request. This is a terminal state.
      */
-    public function suspend(RegistrationRequest $registrationRequest)
+    public function reject(RegistrationRequest $registrationRequest)
     {
-        try {
-            $newStatus = ($registrationRequest->status === 'suspended') ? 'pending' : 'suspended';
-            $message = ($newStatus === 'suspended')
-                ? 'تم تعليق وإيقاف الطلب بنجاح.'
-                : 'تم استعادة الطلب إلى الحالة المعلقة.';
+        if ($registrationRequest->status !== 'pending') {
+            return back()->with('error', 'لا يمكن رفض إلا الطلبات المعلقة.');
+        }
 
+        try {
             $registrationRequest->update([
-                'status' => $newStatus,
+                'status' => 'rejected',
             ]);
 
-            return back()->with('success', $message);
+            return back()->with('success', 'تم رفض الطلب بنجاح.');
         } catch (\Exception $e) {
-            return back()->with('error', 'تعذر تعديل حالة الطلب: '.$e->getMessage());
+            return back()->with('error', 'تعذر رفض الطلب: '.$e->getMessage());
         }
     }
 
     /**
-     * Remove the specified registration request.
+     * Remove the specified registration request. (Blocked by Immutability Rule)
      */
     public function destroy(RegistrationRequest $registrationRequest)
     {
-        try {
-            $name = $registrationRequest->organization_name;
-            $registrationRequest->delete();
-
-            return back()->with('success', "تم حذف طلب تسجيل ({$name}) بنجاح.");
-        } catch (\Exception $e) {
-            return back()->with('error', 'تعذر حذف الطلب: '.$e->getMessage());
-        }
+        return back()->with('error', 'لا يمكن حذف طلبات التسجيل لأنها سجلات تاريخية غير قابلة للحذف.');
     }
 }
+

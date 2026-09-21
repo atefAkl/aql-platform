@@ -21,7 +21,7 @@ export default function RegistrationRequestsIndex({ requests, currentFilter = 'a
     
     // Confirm Dialog State
     const [confirmAction, setConfirmAction] = useState<{
-        type: 'approve' | 'suspend' | 'delete';
+        type: 'approve' | 'reject' | 'delete';
         request: RegistrationRequestData;
     } | null>(null);
 
@@ -31,7 +31,8 @@ export default function RegistrationRequestsIndex({ requests, currentFilter = 'a
     const totalCount = requests.length;
     const pendingCount = requests.filter(r => r.status === 'pending').length;
     const approvedCount = requests.filter(r => r.status === 'approved').length;
-    const suspendedCount = requests.filter(r => r.status === 'suspended').length;
+    const completedCount = requests.filter(r => r.status === 'completed').length;
+    const rejectedCount = requests.filter(r => r.status === 'rejected').length;
 
     // Filter Logic
     const filteredRequests = requests.filter(r => {
@@ -65,8 +66,8 @@ export default function RegistrationRequestsIndex({ requests, currentFilter = 'a
                     setConfirmAction(null);
                 }
             });
-        } else if (type === 'suspend') {
-            router.post(`/admin/requests/${request.id}/suspend`, {}, {
+        } else if (type === 'reject') {
+            router.post(`/admin/requests/${request.id}/reject`, {}, {
                 onFinish: () => {
                     setIsSubmitting(false);
                     setConfirmAction(null);
@@ -81,6 +82,7 @@ export default function RegistrationRequestsIndex({ requests, currentFilter = 'a
             });
         }
     };
+
 
     return (
         <PlatformLayout>
@@ -134,11 +136,18 @@ export default function RegistrationRequestsIndex({ requests, currentFilter = 'a
                         subtext="تم التفعيل وإرسال الرابط"
                     />
                     <StatCard 
-                        title="طلبات معطلة / موقوفة"
-                        value={suspendedCount}
+                        title="مؤسسات تم تفعيلها"
+                        value={completedCount}
+                        icon={<CheckCircle className="w-5 h-5" />}
+                        colorScheme="emerald"
+                        subtext="تم التجهيز والتشغيل"
+                    />
+                    <StatCard 
+                        title="طلبات مرفوضة"
+                        value={rejectedCount}
                         icon={<Ban className="w-5 h-5" />}
                         colorScheme="rose"
-                        subtext="موقوفة مؤقتاً"
+                        subtext="مرفوضة نهائياً"
                     />
                 </div>
 
@@ -151,7 +160,8 @@ export default function RegistrationRequestsIndex({ requests, currentFilter = 'a
                                 { id: 'all', label: 'كافة الطلبات', count: totalCount },
                                 { id: 'pending', label: 'قيد الانتظار', count: pendingCount },
                                 { id: 'approved', label: 'بانتظار التفعيل', count: approvedCount },
-                                { id: 'suspended', label: 'المعطلة', count: suspendedCount },
+                                { id: 'completed', label: 'مكتملة', count: completedCount },
+                                { id: 'rejected', label: 'مرفوضة', count: rejectedCount },
                             ].map(tab => (
                                 <button
                                     key={tab.id}
@@ -223,7 +233,7 @@ export default function RegistrationRequestsIndex({ requests, currentFilter = 'a
                                             </td>
                                             <td className="px-4 py-3.5">
                                                 <Badge variant={req.status}>
-                                                    {req.status === 'pending' ? 'قيد الانتظار' : req.status === 'approved' ? 'بانتظار التفعيل' : req.status === 'provisioned' ? 'مفعل' : 'معطل مؤقتاً'}
+                                                    {req.status === 'pending' ? 'قيد الانتظار' : req.status === 'approved' ? 'بانتظار التفعيل' : req.status === 'completed' ? 'مكتمل' : 'مرفوض'}
                                                 </Badge>
                                             </td>
                                             <td className="px-4 py-3.5 text-center">
@@ -234,8 +244,7 @@ export default function RegistrationRequestsIndex({ requests, currentFilter = 'a
                                                         setIsDetailsModalOpen(true);
                                                     }}
                                                     onApprove={req.status === 'pending' ? () => setConfirmAction({ type: 'approve', request: req }) : undefined}
-                                                    onSuspend={() => setConfirmAction({ type: 'suspend', request: req })}
-                                                    onDelete={() => setConfirmAction({ type: 'delete', request: req })}
+                                                    onReject={req.status === 'pending' ? () => setConfirmAction({ type: 'reject', request: req }) : undefined}
                                                 />
                                             </td>
                                         </tr>
@@ -253,8 +262,7 @@ export default function RegistrationRequestsIndex({ requests, currentFilter = 'a
                 onClose={() => setIsDetailsModalOpen(false)}
                 request={selectedRequest}
                 onApprove={(req) => setConfirmAction({ type: 'approve', request: req })}
-                onSuspend={(req) => setConfirmAction({ type: 'suspend', request: req })}
-                onDelete={(req) => setConfirmAction({ type: 'delete', request: req })}
+                onReject={(req) => setConfirmAction({ type: 'reject', request: req })}
             />
 
             {/* Confirmation Dialog Modal */}
@@ -266,22 +274,23 @@ export default function RegistrationRequestsIndex({ requests, currentFilter = 'a
                     isLoading={isSubmitting}
                     title={
                         confirmAction.type === 'approve' ? 'تأكيد اعتماد وتفعيل الطلب' :
-                        confirmAction.type === 'suspend' ? (confirmAction.request.status === 'suspended' ? 'إلغاء تعليق الطلب' : 'تأكيد إيقاف وتعطيل الطلب') :
-                        'تأكيد حذف طلب التسجيل'
+                        confirmAction.type === 'reject' ? 'تأكيد رفض الطلب' :
+                        'تأكيد الإجراء'
                     }
                     description={
-                        confirmAction.type === 'approve' ? `هل أنت تأكد من موافقتك على طلب تسجيل مؤسسة (${confirmAction.request.organization_name}) وتوليد رابط التفعيل؟` :
-                        confirmAction.type === 'suspend' ? `هل تريد تغيير حالة مؤسسة (${confirmAction.request.organization_name}) إلى ${confirmAction.request.status === 'suspended' ? 'قيد الانتظار' : 'معطل مؤقتاً'}؟` :
-                        `تحذير: هل أنت متأكد من حذف طلب تسجيل (${confirmAction.request.organization_name})؟ لا يمكن التراجع عن هذا الإجراء.`
+                        confirmAction.type === 'approve' ? `هل أنت متأكد من موافقتك على طلب تسجيل مؤسسة (${confirmAction.request.organization_name}) وتوليد رابط التفعيل؟` :
+                        confirmAction.type === 'reject' ? `هل تريد حقاً رفض طلب تسجيل مؤسسة (${confirmAction.request.organization_name})؟ هذا الإجراء نهائي ولا يمكن التراجع عنه.` :
+                        `تأكيد الإجراء`
                     }
                     confirmText={
                         confirmAction.type === 'approve' ? 'نعم، اعتماد الطلب' :
-                        confirmAction.type === 'suspend' ? 'نعم، تنفيذ الإجراء' :
-                        'نعم، حذف الطلب'
+                        confirmAction.type === 'reject' ? 'نعم، رفض الطلب' :
+                        'تأكيد'
                     }
-                    variant={confirmAction.type === 'delete' ? 'danger' : confirmAction.type === 'suspend' ? 'warning' : 'primary'}
+                    variant={confirmAction.type === 'reject' ? 'danger' : 'primary'}
                 />
             )}
         </PlatformLayout>
     );
 }
+

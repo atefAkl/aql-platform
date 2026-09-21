@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\RegistrationRequest;
 use App\Services\TenantProvisioningService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 
@@ -41,21 +42,27 @@ class ActivationController extends Controller
             $centralDomain = preg_replace('/^www\./', '', $centralDomain);
             $domainName = $registrationRequest->slug.'.'.$centralDomain;
 
-            $result = $provisioningService->createTenant(
+            $result = $provisioningService->provisionTenant(
                 $registrationRequest->slug,
-                $registrationRequest->organization_name,
                 $registrationRequest->admin_name,
                 $registrationRequest->admin_email,
                 $validated['password'],
                 $domainName
             );
 
-            // Mark as provisioned
-            $registrationRequest->update([
-                'status' => 'provisioned',
-                'activation_token' => null,
-                'token_expires_at' => null,
-            ]);
+            // Successfully provisioned. Now commit Landlord updates atomically.
+            DB::transaction(function () use ($registrationRequest, $result) {
+                // Set Tenant to ACTIVE
+                $tenant = $result['tenant'];
+                $tenant->update(['status' => 'active']);
+
+                // Mark Request as COMPLETED
+                $registrationRequest->update([
+                    'status' => 'completed',
+                    'activation_token' => null,
+                    'token_expires_at' => null,
+                ]);
+            });
 
             return Inertia::location('http://'.$domainName.'/login');
         } catch (\Exception $e) {
@@ -63,3 +70,4 @@ class ActivationController extends Controller
         }
     }
 }
+
