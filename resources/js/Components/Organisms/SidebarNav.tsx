@@ -16,7 +16,8 @@ import {
     Globe, 
     LogOut,
     Sun,
-    Moon
+    Moon,
+    Home
 } from 'lucide-react';
 import { PageProps } from '../../types';
 
@@ -50,37 +51,50 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ darkMode, setDarkMode })
     const navigationItems: MainMenuItem[] = [
         {
             id: 'dashboard',
-            label: 'لوحة التحكم الرئيسي',
+            label: 'لوحة التحكم الرئيسية',
             icon: <LayoutDashboard className="w-4 h-4 text-blue-500" />,
-            href: '/admin/dashboard',
+            children: [
+                {
+                    id: 'dashboard-home',
+                    label: 'الرئيسية',
+                    icon: <Home className="w-4 h-4 text-amber-500" />,
+                    href: '/admin/dashboard',
+                },
+                {
+                    id: 'requests',
+                    label: 'طلبات التسجيل',
+                    icon: <FileText className="w-4 h-4 text-amber-500" />,
+                    href: '/admin/requests',
+                },
+            ],
         },
         {
             id: 'tenants',
-            label: 'إدارة المؤسسات والطلبات',
+            label: 'حسابات المؤسسات',
             icon: <Building2 className="w-4 h-4 text-emerald-500" />,
             children: [
                 {
-                    id: 'all-requests',
-                    label: 'كافة طلبات التسجيل',
-                    href: '/admin/requests',
-                    icon: <FileText className="w-3.5 h-3.5 text-slate-400" />,
+                    id: 'all-tenants',
+                    label: 'كافة الحسابات',
+                    href: '/admin/tenants',
+                    icon: <Building2 className="w-3.5 h-3.5 text-slate-400" />,
                 },
                 {
-                    id: 'pending-requests',
-                    label: 'طلبات قيد الانتظار',
-                    href: '/admin/requests?status=pending',
-                    icon: <Clock className="w-3.5 h-3.5 text-amber-500" />,
-                },
-                {
-                    id: 'approved-requests',
-                    label: 'بانتظار التفعيل',
-                    href: '/admin/requests?status=approved',
+                    id: 'active-tenants',
+                    label: 'حسابات نشطة',
+                    href: '/admin/tenants?status=active',
                     icon: <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />,
                 },
                 {
-                    id: 'suspended-requests',
-                    label: 'المؤسسات المعطلة',
-                    href: '/admin/requests?status=suspended',
+                    id: 'suspended-tenants',
+                    label: 'موقوفة مؤقتاً',
+                    href: '/admin/tenants?status=suspended',
+                    icon: <Clock className="w-3.5 h-3.5 text-amber-500" />,
+                },
+                {
+                    id: 'archived-tenants',
+                    label: 'حسابات مؤرشفة',
+                    href: '/admin/tenants?status=archived',
                     icon: <Ban className="w-3.5 h-3.5 text-rose-500" />,
                 },
             ],

@@ -44,7 +44,8 @@ export default function Dashboard({ stats }: Props) {
                 </div>
             </div>
 
-            {/* High Level Stats Grid */}
+            {/* High Level Stats Grid (Temporarily Hidden per Request) */}
+            {/* 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
                 <StatCard
                     title="إجمالي المستأجرين"
@@ -89,6 +90,7 @@ export default function Dashboard({ stats }: Props) {
                     subtext="طاقم إدارة Landlord"
                 />
             </div>
+            */}
 
             {/* Clean Main Content Placeholder for Future Admin Widgets */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-12 text-center border-dashed">

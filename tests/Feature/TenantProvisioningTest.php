@@ -8,7 +8,6 @@ use App\Models\Tenant;
 use App\Models\User;
 use App\Services\TenantProvisioningService;
 use Tests\TestCase;
-use Stancl\Tenancy\Jobs\DeleteDatabase;
 
 class TenantProvisioningTest extends TestCase
 {
@@ -17,7 +16,7 @@ class TenantProvisioningTest extends TestCase
         $service = new TenantProvisioningService;
 
         $tenantId = 'provcorp'.rand(1000, 9999);
-        
+
         // 1. Manually create the Tenant record without triggering tenancy DB creation
         Tenant::withoutEvents(function () use ($tenantId) {
             Tenant::create([
@@ -45,7 +44,7 @@ class TenantProvisioningTest extends TestCase
 
         $centralDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
         $centralDomain = preg_replace('/^www\./', '', $centralDomain);
-        
+
         $this->assertDatabaseHas('domains', [
             'tenant_id' => $tenantId,
             'domain' => "{$tenantId}.{$centralDomain}",
@@ -80,4 +79,3 @@ class TenantProvisioningTest extends TestCase
         $tenant->delete();
     }
 }
-

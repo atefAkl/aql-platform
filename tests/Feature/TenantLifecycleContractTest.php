@@ -5,68 +5,69 @@ namespace Tests\Feature;
 use App\Models\RegistrationRequest;
 use App\Models\Tenant;
 use Illuminate\Support\Facades\DB;
-use Tests\TestCase;
+use Illuminate\Support\Str;
+use Stancl\Tenancy\Events\TenantCreated;
 use Stancl\Tenancy\Jobs\DeleteDatabase;
+use Tests\TestCase;
 
 class TenantLifecycleContractTest extends TestCase
 {
     public function test_tenant_db_is_not_created_at_approval()
     {
-        $slug = 'approval-corp-' . strtolower(\Illuminate\Support\Str::random(5));
+        $tenantId = 'approval-corp-' . rand(1000, 9999);
         // 1. Create a PENDING request
         $request = RegistrationRequest::create([
             'organization_name' => 'Approval Corp',
-            'slug' => $slug,
+            'slug' => $tenantId,
             'admin_name' => 'Admin',
-            'admin_email' => 'admin@approval.com',
+            'admin_email' => "admin@{$tenantId}.com",
             'status' => 'pending',
         ]);
 
         // 2. Approve Request (simulating what the controller does)
         $request->update([
             'status' => 'approved',
-            'activation_token' => \Illuminate\Support\Str::random(60),
-            'token_expires_at' => now()->addDays(7)
+            'activation_token' => Str::random(60),
+            'token_expires_at' => now()->addDays(7),
         ]);
 
-        Tenant::withoutEvents(function () use ($request) {
+        Tenant::withoutEvents(function () use ($tenantId, $request) {
             Tenant::create([
-                'id' => $request->slug,
+                'id' => $tenantId,
                 'name' => $request->organization_name,
                 'status' => null, // Pre-operational
             ]);
         });
 
         $this->assertDatabaseHas('tenants', [
-            'id' => $slug,
+            'id' => $tenantId,
             'status' => null,
         ], 'pgsql');
 
         // 3. Verify no DB was created
-        // Connect to postgres and check if db exists
-        $dbName = config('tenancy.database.prefix') . $slug;
-        $dbExists = DB::connection('pgsql')->select("SELECT datname FROM pg_catalog.pg_database WHERE datname = ?", [$dbName]);
-        
-        $this->assertEmpty($dbExists, "Tenant DB should NOT be created at approval.");
-        
+        $dbName = config('tenancy.database.prefix') . $tenantId;
+        $dbExists = DB::connection('pgsql')->select('SELECT datname FROM pg_catalog.pg_database WHERE datname = ?', [$dbName]);
+
+        $this->assertEmpty($dbExists, 'Tenant DB should NOT be created at approval.');
+
         // Teardown
-        Tenant::withoutEvents(function () use ($slug) {
-            Tenant::find($slug)?->delete();
+        Tenant::withoutEvents(function () use ($tenantId) {
+            Tenant::find($tenantId)?->delete();
         });
         $request->delete();
     }
 
     public function test_provisioning_failure_allows_retry_and_preserves_state()
     {
-        $tenantId = 'fail-corp-' . strtolower(\Illuminate\Support\Str::random(5));
-        
+        $tenantId = 'fail-corp-' . rand(1000, 9999);
+
         $request = RegistrationRequest::create([
             'organization_name' => 'Fail Corp',
             'slug' => $tenantId,
             'admin_name' => 'Admin',
-            'admin_email' => 'admin@fail.com',
+            'admin_email' => "admin@{$tenantId}.com",
             'status' => 'approved',
-            'activation_token' => 'some-token',
+            'activation_token' => Str::random(60),
         ]);
 
         Tenant::withoutEvents(function () use ($tenantId) {
@@ -77,21 +78,10 @@ class TenantLifecycleContractTest extends TestCase
             ]);
         });
 
-        // Mock a failure in TenantProvisioningService? 
-        // We can just call it with invalid data or simulate a failure, but a unit test for the service itself is better.
-        // I will just use the controller's logic: if provisioning fails, it rolls back DB, but keeps Tenant Record.
-        $service = new \App\Services\TenantProvisioningService();
-        
+        $tenant = Tenant::find($tenantId);
         try {
-            // Assuming this will fail due to some invalid logic, 
-            // but wait, to FORCE a failure, we can dispatch a fake event?
-            // Actually, we can just test that the compensation job DeleteDatabase works.
-            $tenant = Tenant::find($tenantId);
-            event(new \Stancl\Tenancy\Events\TenantCreated($tenant)); // Creates DB
-            
-            // Oh no, something failed!
-            throw new \Exception("Provisioning Failed!");
-            
+            event(new TenantCreated($tenant)); // Creates DB
+            throw new \Exception('Provisioning Failed!');
         } catch (\Exception $e) {
             // Compensation
             dispatch_sync(new DeleteDatabase($tenant));
@@ -109,19 +99,20 @@ class TenantLifecycleContractTest extends TestCase
         ], 'pgsql');
 
         $dbName = config('tenancy.database.prefix') . $tenantId;
-        $dbExists = DB::connection('pgsql')->select("SELECT datname FROM pg_catalog.pg_database WHERE datname = ?", [$dbName]);
-        $this->assertEmpty($dbExists, "Tenant DB should be dropped on failure.");
-        
+        $dbExists = DB::connection('pgsql')->select('SELECT datname FROM pg_catalog.pg_database WHERE datname = ?', [$dbName]);
+        $this->assertEmpty($dbExists, 'Tenant DB should be dropped on failure.');
+
         // Teardown
         Tenant::withoutEvents(function () use ($tenantId) {
             Tenant::find($tenantId)?->delete();
         });
+        $request->delete();
     }
 
     public function test_archived_state_behavior()
     {
-        $tenantId = 'archive-corp';
-        
+        $tenantId = 'archive-corp-' . rand(1000, 9999);
+
         Tenant::withoutEvents(function () use ($tenantId) {
             Tenant::create([
                 'id' => $tenantId,
@@ -141,4 +132,3 @@ class TenantLifecycleContractTest extends TestCase
         });
     }
 }
-

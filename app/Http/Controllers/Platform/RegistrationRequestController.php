@@ -89,11 +89,26 @@ class RegistrationRequestController extends Controller
     }
 
     /**
-     * Remove the specified registration request. (Blocked by Immutability Rule)
+     * Remove the specified registration request.
      */
     public function destroy(RegistrationRequest $registrationRequest)
     {
-        return back()->with('error', 'لا يمكن حذف طلبات التسجيل لأنها سجلات تاريخية غير قابلة للحذف.');
+        try {
+            // Find and delete linked tenant record in Landlord DB if present
+            $tenant = Tenant::find(Str::slug($registrationRequest->slug));
+            if ($tenant) {
+                try {
+                    $tenant->delete();
+                } catch (\Exception $e) {
+                    Tenant::withoutEvents(fn () => $tenant->delete());
+                }
+            }
+
+            $registrationRequest->delete();
+
+            return back()->with('success', 'تم حذف طلب التسجيل وسجل المؤسسة المرتبط به بنجاح.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'تعذر حذف طلب التسجيل: '.$e->getMessage());
+        }
     }
 }
-
