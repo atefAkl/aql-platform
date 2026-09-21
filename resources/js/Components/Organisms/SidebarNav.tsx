@@ -16,7 +16,8 @@ import {
     Globe, 
     LogOut,
     Sun,
-    Moon
+    Moon,
+    Home
 } from 'lucide-react';
 import { PageProps } from '../../types';
 
@@ -52,13 +53,20 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ darkMode, setDarkMode })
             id: 'dashboard',
             label: 'لوحة التحكم الرئيسية',
             icon: <LayoutDashboard className="w-4 h-4 text-blue-500" />,
-            href: '/admin/dashboard',
-        },
-        {
-            id: 'requests',
-            label: 'طلبات التسجيل',
-            icon: <FileText className="w-4 h-4 text-amber-500" />,
-            href: '/admin/requests',
+            children: [
+                {
+                    id: 'dashboard-home',
+                    label: 'الرئيسية',
+                    icon: <Home className="w-4 h-4 text-amber-500" />,
+                    href: '/admin/dashboard',
+                },
+                {
+                    id: 'requests',
+                    label: 'طلبات التسجيل',
+                    icon: <FileText className="w-4 h-4 text-amber-500" />,
+                    href: '/admin/requests',
+                },
+            ],
         },
         {
             id: 'tenants',
