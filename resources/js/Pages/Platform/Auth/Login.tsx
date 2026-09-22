@@ -5,10 +5,14 @@ import { Lock, Mail, ShieldAlert, KeyRound, Eye, EyeOff } from 'lucide-react';
 export default function Login() {
     const [showPassword, setShowPassword] = useState<boolean>(false);
 
+    const params = new URLSearchParams(window.location.search);
+    const nextUrl = params.get('next') || '';
+
     const { data, setData, post, processing, errors } = useForm({
         email: '',
         password: '',
         remember: true,
+        next: nextUrl,
     });
 
     const handleSubmit = (e: React.FormEvent) => {

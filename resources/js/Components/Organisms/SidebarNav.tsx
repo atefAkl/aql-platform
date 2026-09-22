@@ -45,9 +45,6 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ darkMode, setDarkMode })
     const { url, props } = usePage<PageProps>();
     const authUser = props.auth?.user;
 
-    // State for single-open accordion (Only 1 menu open at a time)
-    const [openMenuId, setOpenMenuId] = useState<string | null>('tenants');
-
     const navigationItems: MainMenuItem[] = [
         {
             id: 'dashboard',
@@ -132,6 +129,22 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ darkMode, setDarkMode })
             ],
         },
     ];
+
+    const [openMenuId, setOpenMenuId] = useState<string | null>(() => {
+        const activeItem = navigationItems.find(item => 
+            item.href ? url === item.href : item.children?.some(child => url.startsWith(child.href.split('?')[0]))
+        );
+        return activeItem ? activeItem.id : null;
+    });
+
+    React.useEffect(() => {
+        const activeItem = navigationItems.find(item => 
+            item.href ? url === item.href : item.children?.some(child => url.startsWith(child.href.split('?')[0]))
+        );
+        if (activeItem) {
+            setOpenMenuId(activeItem.id);
+        }
+    }, [url]);
 
     const toggleMenu = (id: string) => {
         // Single-open accordion logic: if clicked menu is open, close it; else open ONLY clicked menu.

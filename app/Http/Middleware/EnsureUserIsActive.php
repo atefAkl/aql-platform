@@ -19,6 +19,7 @@ class EnsureUserIsActive
             auth()->logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
+
             return redirect()->route('login')->withErrors(['email' => 'حسابك معلق حالياً. يرجى التواصل مع مسؤول النظام.']);
         }
 

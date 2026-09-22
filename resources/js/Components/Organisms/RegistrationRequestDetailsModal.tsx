@@ -53,7 +53,14 @@ export const RegistrationRequestDetailsModal: React.FC<RegistrationRequestDetail
                         </div>
                     </div>
                     <Badge variant={request.status}>
-                        {request.status === 'pending' ? 'قيد الانتظار' : request.status === 'approved' ? 'معتمد / بانتظار التفعيل' : request.status === 'completed' ? 'مكتمل' : 'مرفوض'}
+                        {
+                            {
+                                pending: 'قيد الانتظار',
+                                approved: 'معتمد / بانتظار التفعيل',
+                                completed: 'مكتمل',
+                                rejected: 'مرفوض',
+                            }[request.status as string] || request.status || 'مجهول'
+                        }
                     </Badge>
                 </div>
 

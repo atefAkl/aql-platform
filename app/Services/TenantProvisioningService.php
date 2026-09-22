@@ -130,7 +130,7 @@ class TenantProvisioningService
                         tenancy()->end();
                     }
                     $tenant->domains()->delete();
-                    
+
                     // Drop PostgreSQL tenant database if created, but keep the Tenant Record in Landlord DB
                     dispatch_sync(new DeleteDatabase($tenant));
                 } catch (\Throwable $cleanupEx) {
@@ -142,4 +142,3 @@ class TenantProvisioningService
         }
     }
 }
-

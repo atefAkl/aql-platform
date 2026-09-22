@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Tenant;
-use App\Models\User;
 use App\Services\AuditLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -45,9 +43,14 @@ class AuthenticatedSessionController extends Controller
         AuditLogService::record(
             'AUTH_LOGIN',
             'User',
-            Auth::id() . '',
-            "تسجيل دخول ناجح للمستخدم: " . Auth::user()->email
+            Auth::id().'',
+            'تسجيل دخول ناجح للمستخدم: '.Auth::user()->email
         );
+
+        $next = $request->input('next');
+        if ($next && (str_starts_with($next, '/') || parse_url($next, PHP_URL_HOST) === $request->getHost())) {
+            return redirect($next);
+        }
 
         return redirect()->intended('/users');
     }
@@ -63,8 +66,8 @@ class AuthenticatedSessionController extends Controller
             AuditLogService::record(
                 'AUTH_LOGOUT',
                 'User',
-                $user->id . '',
-                "تسجيل خروج للمستخدم: " . $user->email
+                $user->id.'',
+                'تسجيل خروج للمستخدم: '.$user->email
             );
         }
 

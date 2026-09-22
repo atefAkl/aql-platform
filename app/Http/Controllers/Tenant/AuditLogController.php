@@ -6,10 +6,9 @@ namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
-
-use Illuminate\Support\Facades\Gate;
 
 class AuditLogController extends Controller
 {
@@ -21,7 +20,6 @@ class AuditLogController extends Controller
         Gate::authorize('audit.view');
 
         $auditLogs = AuditLog::orderBy('id', 'desc')->paginate(20);
-
 
         return Inertia::render('Audit/Index', [
             'auditLogs' => $auditLogs,

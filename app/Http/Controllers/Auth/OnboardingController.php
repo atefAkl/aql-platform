@@ -5,17 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\RegistrationRequest;
 use App\Models\Tenant;
-use App\Services\TenantProvisioningService;
-use Stancl\Tenancy\Database\Models\Domain;
 use Illuminate\Http\Request;
-
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
-
-use Illuminate\Validation\Rule;
+use Stancl\Tenancy\Database\Models\Domain;
 
 class OnboardingController extends Controller
 {
@@ -26,6 +22,7 @@ class OnboardingController extends Controller
     {
         $centralDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
         $centralDomain = preg_replace('/^www\./', '', $centralDomain);
+
         return Inertia::render('Auth/Onboarding', [
             'central_domain' => $centralDomain,
         ]);
@@ -49,7 +46,7 @@ class OnboardingController extends Controller
                 'max:50',
                 function ($attribute, $value, $fail) {
                     $slug = Str::slug($value);
-                    if (Tenant::on('pgsql')->where('id', $slug)->exists() || \App\Models\RegistrationRequest::where('slug', $slug)->exists()) {
+                    if (Tenant::on('pgsql')->where('id', $slug)->exists() || RegistrationRequest::where('slug', $slug)->exists()) {
                         $fail('المعرف الفريد للمؤسسة مستخدم بالفعل أو قيد المراجعة، يرجى اختيار معرف آخر.');
                     }
                 },
@@ -65,11 +62,10 @@ class OnboardingController extends Controller
             'admin_email.email' => 'صيغة البريد الإلكتروني غير صحيحة.',
         ]);
 
-
         $slug = Str::slug($validated['slug']);
         $centralDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
         $centralDomain = preg_replace('/^www\./', '', $centralDomain);
-        $domainName = $slug . '.' . $centralDomain;
+        $domainName = $slug.'.'.$centralDomain;
 
         // Additional uniqueness check for domain mapping
         if (Domain::where('domain', $domainName)->exists()) {
@@ -79,7 +75,7 @@ class OnboardingController extends Controller
         }
 
         try {
-            \App\Models\RegistrationRequest::create([
+            RegistrationRequest::create([
                 'organization_name' => $validated['organization_name'],
                 'slug' => $slug,
                 'admin_name' => $validated['admin_name'],
@@ -87,10 +83,10 @@ class OnboardingController extends Controller
                 'status' => 'pending',
             ]);
 
-            return redirect()->route('onboarding')->with('success', "تم إرسال طلب التسجيل بنجاح! طلبك الآن قيد المراجعة.");
+            return redirect()->route('onboarding')->with('success', 'تم إرسال طلب التسجيل بنجاح! طلبك الآن قيد المراجعة.');
         } catch (\Throwable $e) {
             return back()->withErrors([
-                'organization_name' => 'تعذر إرسال الطلب: ' . $e->getMessage(),
+                'organization_name' => 'تعذر إرسال الطلب: '.$e->getMessage(),
             ]);
         }
     }

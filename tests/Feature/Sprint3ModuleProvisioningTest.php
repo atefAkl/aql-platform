@@ -2,26 +2,27 @@
 
 namespace Tests\Feature;
 
-use App\Models\Tenant;
 use App\Models\Module;
+use App\Models\Tenant;
 use App\Models\TenantSubscription;
-use Tests\TestCase;
 use App\Services\ModuleProvisionerService;
+use Illuminate\Support\Str;
+use Tests\TestCase;
 
 class Sprint3ModuleProvisioningTest extends TestCase
 {
     public function test_module_provisioning_lifecycle()
     {
         // 1. Setup Tenant and Module
-        $tenantId = 'test-prov-' . strtolower(\Illuminate\Support\Str::random(4));
+        $tenantId = 'test-prov-'.strtolower(Str::random(4));
         $tenant = Tenant::create(['id' => $tenantId, 'name' => 'Test Prov', 'status' => 'active']);
-        
+
         $module = Module::firstOrCreate(['code' => 'hr'], [
             'name' => 'HR System',
-            'status' => 'active'
+            'status' => 'active',
         ]);
 
-        $service = new ModuleProvisionerService();
+        $service = new ModuleProvisionerService;
 
         // 2. Test Provisioning
         $subscription = $service->provision($tenant, 'hr');
@@ -36,12 +37,12 @@ class Sprint3ModuleProvisioningTest extends TestCase
 
     public function test_provisioning_failure_triggers_rollback()
     {
-        $tenantId = 'test-prov-' . strtolower(\Illuminate\Support\Str::random(4));
+        $tenantId = 'test-prov-'.strtolower(Str::random(4));
         $tenant = Tenant::create(['id' => $tenantId, 'name' => 'Test Prov Fail', 'status' => 'active']);
-        
+
         $module = Module::firstOrCreate(['code' => 'fail_mod'], [
             'name' => 'Fail Mod',
-            'status' => 'active'
+            'status' => 'active',
         ]);
 
         // We simulate a failure by mocking the run method on the tenant
@@ -49,14 +50,14 @@ class Sprint3ModuleProvisioningTest extends TestCase
         $subscription = TenantSubscription::create([
             'tenant_id' => $tenant->id,
             'module_code' => 'fail_mod',
-            'status' => 'provisioning'
+            'status' => 'provisioning',
         ]);
 
-        $service = new ModuleProvisionerService();
+        $service = new ModuleProvisionerService;
         $service->rollback($subscription);
 
         $this->assertEquals('failed', $subscription->fresh()->status);
-        
+
         $tenant->delete();
     }
 }

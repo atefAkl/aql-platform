@@ -14,7 +14,7 @@ class TenantLifecycleContractTest extends TestCase
 {
     public function test_tenant_db_is_not_created_at_approval()
     {
-        $tenantId = 'approval-corp-' . rand(1000, 9999);
+        $tenantId = 'approval-corp-'.rand(1000, 9999);
         // 1. Create a PENDING request
         $request = RegistrationRequest::create([
             'organization_name' => 'Approval Corp',
@@ -45,7 +45,7 @@ class TenantLifecycleContractTest extends TestCase
         ], 'pgsql');
 
         // 3. Verify no DB was created
-        $dbName = config('tenancy.database.prefix') . $tenantId;
+        $dbName = config('tenancy.database.prefix').$tenantId;
         $dbExists = DB::connection('pgsql')->select('SELECT datname FROM pg_catalog.pg_database WHERE datname = ?', [$dbName]);
 
         $this->assertEmpty($dbExists, 'Tenant DB should NOT be created at approval.');
@@ -59,7 +59,7 @@ class TenantLifecycleContractTest extends TestCase
 
     public function test_provisioning_failure_allows_retry_and_preserves_state()
     {
-        $tenantId = 'fail-corp-' . rand(1000, 9999);
+        $tenantId = 'fail-corp-'.rand(1000, 9999);
 
         $request = RegistrationRequest::create([
             'organization_name' => 'Fail Corp',
@@ -98,7 +98,7 @@ class TenantLifecycleContractTest extends TestCase
             'status' => 'approved',
         ], 'pgsql');
 
-        $dbName = config('tenancy.database.prefix') . $tenantId;
+        $dbName = config('tenancy.database.prefix').$tenantId;
         $dbExists = DB::connection('pgsql')->select('SELECT datname FROM pg_catalog.pg_database WHERE datname = ?', [$dbName]);
         $this->assertEmpty($dbExists, 'Tenant DB should be dropped on failure.');
 
@@ -111,7 +111,7 @@ class TenantLifecycleContractTest extends TestCase
 
     public function test_archived_state_behavior()
     {
-        $tenantId = 'archive-corp-' . rand(1000, 9999);
+        $tenantId = 'archive-corp-'.rand(1000, 9999);
 
         Tenant::withoutEvents(function () use ($tenantId) {
             Tenant::create([

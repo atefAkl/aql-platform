@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Tenant\AuditLogController;
 use App\Http\Controllers\Tenant\UserController;
-use App\Http\Middleware\PreventTenantWritesIfSuspended;
 use App\Http\Middleware\EnsureUserIsActive;
+use App\Http\Middleware\PreventTenantWritesIfSuspended;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;

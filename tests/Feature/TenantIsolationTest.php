@@ -11,34 +11,33 @@ class TenantIsolationTest extends TestCase
 {
     public function test_tenant_database_and_data_isolation()
     {
-        $service = new TenantProvisioningService();
+        $service = new TenantProvisioningService;
 
         // 1. Create Tenant A
-        $idA = 'tenant-a-' . rand(100, 999);
-        \App\Models\Tenant::unsetEventDispatcher();
-        \App\Models\Tenant::firstOrCreate([
+        $idA = 'tenant-a-'.rand(100, 999);
+        Tenant::unsetEventDispatcher();
+        Tenant::firstOrCreate([
             'id' => $idA,
         ], [
             'name' => 'Tenant A Corporation',
             'status' => null,
         ]);
-        \App\Models\Tenant::setEventDispatcher(app('events'));
+        Tenant::setEventDispatcher(app('events'));
         $resA = $service->provisionTenant($idA, 'Admin Tenant A', "admin@{$idA}.com", 'password123');
         $tenantA = $resA['tenant'];
 
         // 2. Create Tenant B
-        $idB = 'tenant-b-' . rand(100, 999);
-        \App\Models\Tenant::unsetEventDispatcher();
-        \App\Models\Tenant::firstOrCreate([
+        $idB = 'tenant-b-'.rand(100, 999);
+        Tenant::unsetEventDispatcher();
+        Tenant::firstOrCreate([
             'id' => $idB,
         ], [
             'name' => 'Tenant B Corporation',
             'status' => null,
         ]);
-        \App\Models\Tenant::setEventDispatcher(app('events'));
+        Tenant::setEventDispatcher(app('events'));
         $resB = $service->provisionTenant($idB, 'Admin Tenant B', "admin@{$idB}.com", 'password123');
         $tenantB = $resB['tenant'];
-
 
         // 3. Add extra user in Tenant A
         $tenantA->run(function () use ($idA) {

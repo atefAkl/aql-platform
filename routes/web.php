@@ -20,11 +20,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function (Request $request) {
     $centralDomains = config('tenancy.central_domains', []);
     if (in_array($request->getHost(), $centralDomains, true)) {
-        if (auth('platform')->check()) {
-            return redirect()->route('platform.dashboard');
-        }
-
-        return redirect('/onboarding');
+        return inertia('Welcome');
     }
 
     if (auth('web')->check()) {
@@ -39,10 +35,6 @@ Route::get('/onboarding', function (Request $request) {
     $centralDomains = config('tenancy.central_domains', []);
     if (! in_array($request->getHost(), $centralDomains, true)) {
         return redirect('/login');
-    }
-
-    if (auth('platform')->check()) {
-        return redirect()->route('platform.dashboard');
     }
 
     return app(OnboardingController::class)->create();

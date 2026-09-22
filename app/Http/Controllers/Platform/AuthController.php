@@ -21,6 +21,12 @@ class AuthController extends Controller
 
         if (auth()->guard('platform')->attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
+
+            $next = $request->input('next');
+            if ($next && (str_starts_with($next, '/') || parse_url($next, PHP_URL_HOST) === $request->getHost())) {
+                return redirect($next);
+            }
+
             return redirect()->intended('/admin/dashboard');
         }
 

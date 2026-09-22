@@ -21,14 +21,14 @@ class AuthorizationTest extends TestCase
 
         $service = new TenantProvisioningService;
         $this->tenantId = 'authzsuite'.rand(1000, 9999);
-        \App\Models\Tenant::unsetEventDispatcher();
-        \App\Models\Tenant::firstOrCreate([
+        Tenant::unsetEventDispatcher();
+        Tenant::firstOrCreate([
             'id' => $this->tenantId,
         ], [
             'name' => 'شركة التحكم بالصلاحيات',
             'status' => null,
         ]);
-        \App\Models\Tenant::setEventDispatcher(app('events'));
+        Tenant::setEventDispatcher(app('events'));
         $res = $service->provisionTenant($this->tenantId, 'مدير الصلاحيات', "admin@{$this->tenantId}.com", 'password123');
         $this->tenant = $res['tenant'];
     }

@@ -26,7 +26,7 @@ export default function Onboarding({ central_domain }: { central_domain: string 
         admin_email: '',
     });
 
-    const { flash } = usePage<any>().props;
+    const { flash, auth } = usePage<any>().props;
 
     const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -66,10 +66,10 @@ export default function Onboarding({ central_domain }: { central_domain: string 
                     </button>
 
                     <Link
-                        href="/login"
+                        href={auth?.user ? "/admin/dashboard" : "/login"}
                         className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 px-3 py-2"
                     >
-                        تسجيل الدخول
+                        {auth?.user ? 'لوحة التحكم' : 'تسجيل الدخول'}
                         <ArrowRight className="w-4 h-4 rotate-180" />
                     </Link>
                 </div>
@@ -91,6 +91,12 @@ export default function Onboarding({ central_domain }: { central_domain: string 
                     {flash?.success && (
                         <div className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 p-4 rounded-xl text-sm font-medium border border-emerald-200 dark:border-emerald-800">
                             {flash.success}
+                        </div>
+                    )}
+
+                    {flash?.error && (
+                        <div className="bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 p-4 rounded-xl text-sm font-medium border border-rose-200 dark:border-rose-800">
+                            {flash.error}
                         </div>
                     )}
 

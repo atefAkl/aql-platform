@@ -32,8 +32,8 @@ class Sprint2OnboardingTest extends TestCase
     public function test_1_fresh_platform_has_no_tenant()
     {
         // Clean any leftover test tenants
-        \App\Models\Tenant::withoutEvents(function () {
-            foreach (\App\Models\Tenant::all() as $t) {
+        Tenant::withoutEvents(function () {
+            foreach (Tenant::all() as $t) {
                 $t->delete();
             }
         });
@@ -74,14 +74,14 @@ class Sprint2OnboardingTest extends TestCase
     public function test_3_tenant_database_is_provisioned()
     {
         $service = new TenantProvisioningService;
-        \App\Models\Tenant::unsetEventDispatcher();
-        \App\Models\Tenant::firstOrCreate([
+        Tenant::unsetEventDispatcher();
+        Tenant::firstOrCreate([
             'id' => 'dbprov-test',
         ], [
             'name' => 'شركة التهيئة والداول',
             'status' => null,
         ]);
-        \App\Models\Tenant::setEventDispatcher(app('events'));
+        Tenant::setEventDispatcher(app('events'));
         $result = $service->provisionTenant('dbprov-test', 'سليمان علي', 'admin@dbprov.com', 'Password123!');
 
         $tenant = $result['tenant'];
@@ -107,14 +107,14 @@ class Sprint2OnboardingTest extends TestCase
     public function test_4_initial_administrator_is_created()
     {
         $service = new TenantProvisioningService;
-        \App\Models\Tenant::unsetEventDispatcher();
-        \App\Models\Tenant::firstOrCreate([
+        Tenant::unsetEventDispatcher();
+        Tenant::firstOrCreate([
             'id' => 'admin-test',
         ], [
             'name' => 'مؤسسة الإدارة الأولى',
             'status' => null,
         ]);
-        \App\Models\Tenant::setEventDispatcher(app('events'));
+        Tenant::setEventDispatcher(app('events'));
         $result = $service->provisionTenant('admin-test', 'عمر الفاروق', 'omar@admintest.com', 'AdminSecret123!');
 
         $tenant = $result['tenant'];
@@ -140,14 +140,14 @@ class Sprint2OnboardingTest extends TestCase
     public function test_5_administrator_has_required_permissions()
     {
         $service = new TenantProvisioningService;
-        \App\Models\Tenant::unsetEventDispatcher();
-        \App\Models\Tenant::firstOrCreate([
+        Tenant::unsetEventDispatcher();
+        Tenant::firstOrCreate([
             'id' => 'perm-test',
         ], [
             'name' => 'شركة الصلاحيات الكاملة',
             'status' => null,
         ]);
-        \App\Models\Tenant::setEventDispatcher(app('events'));
+        Tenant::setEventDispatcher(app('events'));
         $result = $service->provisionTenant('perm-test', 'سامر حسام', 'samer@permtest.com', 'Password123!');
 
         $tenant = $result['tenant'];
@@ -198,23 +198,23 @@ class Sprint2OnboardingTest extends TestCase
     public function test_7_no_tenant_means_no_arbitrary_tenant_selection()
     {
         $service = new TenantProvisioningService;
-        \App\Models\Tenant::unsetEventDispatcher();
-        \App\Models\Tenant::firstOrCreate([
+        Tenant::unsetEventDispatcher();
+        Tenant::firstOrCreate([
             'id' => 'corp-one',
         ], [
             'name' => 'Corp One',
             'status' => null,
         ]);
-        \App\Models\Tenant::setEventDispatcher(app('events'));
+        Tenant::setEventDispatcher(app('events'));
         $resA = $service->provisionTenant('corp-one', 'Admin 1', 'admin1@one.com', 'Pass123!');
-        \App\Models\Tenant::unsetEventDispatcher();
-        \App\Models\Tenant::firstOrCreate([
+        Tenant::unsetEventDispatcher();
+        Tenant::firstOrCreate([
             'id' => 'corp-two',
         ], [
             'name' => 'Corp Two',
             'status' => null,
         ]);
-        \App\Models\Tenant::setEventDispatcher(app('events'));
+        Tenant::setEventDispatcher(app('events'));
         $resB = $service->provisionTenant('corp-two', 'Admin 2', 'admin2@two.com', 'Pass123!');
         $tenantA = $resA['tenant'];
         $tenantB = $resB['tenant'];
@@ -271,23 +271,23 @@ class Sprint2OnboardingTest extends TestCase
         Tenant::create(['id' => 'existing-tenant', 'name' => 'Existing', 'status' => 'active']);
 
         try {
-            \App\Models\Tenant::unsetEventDispatcher();
-        \App\Models\Tenant::firstOrCreate([
-            'id' => 'existing-tenant',
-        ], [
-            'name' => 'Bad Corp',
-            'status' => null,
-        ]);
-        \App\Models\Tenant::setEventDispatcher(app('events'));
-        $service->provisionTenant('existing-tenant', 'Admin', 'admin@bad.com', 'Password123!');
+            Tenant::unsetEventDispatcher();
+            Tenant::firstOrCreate([
+                'id' => 'existing-tenant',
+            ], [
+                'name' => 'Bad Corp',
+                'status' => null,
+            ]);
+            Tenant::setEventDispatcher(app('events'));
+            $service->provisionTenant('existing-tenant', 'Admin', 'admin@bad.com', 'Password123!');
             $this->fail('Expected provisioning exception was not thrown.');
         } catch (\Throwable $e) {
             $this->assertStringContainsString('فشل في تهيئة ونشر بيئة المؤسسة', $e->getMessage());
         }
 
         // Cleanup
-        \App\Models\Tenant::withoutEvents(function () {
-            \App\Models\Tenant::find('existing-tenant')?->delete();
+        Tenant::withoutEvents(function () {
+            Tenant::find('existing-tenant')?->delete();
         });
     }
 
@@ -297,23 +297,23 @@ class Sprint2OnboardingTest extends TestCase
     public function test_10_tenant_isolation_prevents_cross_access()
     {
         $service = new TenantProvisioningService;
-        \App\Models\Tenant::unsetEventDispatcher();
-        \App\Models\Tenant::firstOrCreate([
+        Tenant::unsetEventDispatcher();
+        Tenant::firstOrCreate([
             'id' => 'tenant-iso-a',
         ], [
             'name' => 'Tenant Iso A',
             'status' => null,
         ]);
-        \App\Models\Tenant::setEventDispatcher(app('events'));
+        Tenant::setEventDispatcher(app('events'));
         $resA = $service->provisionTenant('tenant-iso-a', 'Admin A', 'admin@iso-a.com', 'Password123!');
-        \App\Models\Tenant::unsetEventDispatcher();
-        \App\Models\Tenant::firstOrCreate([
+        Tenant::unsetEventDispatcher();
+        Tenant::firstOrCreate([
             'id' => 'tenant-iso-b',
         ], [
             'name' => 'Tenant Iso B',
             'status' => null,
         ]);
-        \App\Models\Tenant::setEventDispatcher(app('events'));
+        Tenant::setEventDispatcher(app('events'));
         $resB = $service->provisionTenant('tenant-iso-b', 'Admin B', 'admin@iso-b.com', 'Password123!');
         $tenantA = $resA['tenant'];
         $tenantB = $resB['tenant'];
@@ -368,14 +368,14 @@ class Sprint2OnboardingTest extends TestCase
     public function test_11_audit_is_created_on_tenant_provisioning()
     {
         $service = new TenantProvisioningService;
-        \App\Models\Tenant::unsetEventDispatcher();
-        \App\Models\Tenant::firstOrCreate([
+        Tenant::unsetEventDispatcher();
+        Tenant::firstOrCreate([
             'id' => 'audit-prov-test',
         ], [
             'name' => 'شركة التدقيق الفوري',
             'status' => null,
         ]);
-        \App\Models\Tenant::setEventDispatcher(app('events'));
+        Tenant::setEventDispatcher(app('events'));
         $result = $service->provisionTenant('audit-prov-test', 'أيمن فؤاد', 'ayman@auditprov.com', 'Password123!');
         $tenant = $result['tenant'];
 
@@ -400,14 +400,14 @@ class Sprint2OnboardingTest extends TestCase
     {
         $service = new TenantProvisioningService;
         $secretPassword = 'SuperSecretUnseenPassword999!';
-        \App\Models\Tenant::unsetEventDispatcher();
-        \App\Models\Tenant::firstOrCreate([
+        Tenant::unsetEventDispatcher();
+        Tenant::firstOrCreate([
             'id' => 'secret-audit-test',
         ], [
             'name' => 'شركة السرية التامة',
             'status' => null,
         ]);
-        \App\Models\Tenant::setEventDispatcher(app('events'));
+        Tenant::setEventDispatcher(app('events'));
         $result = $service->provisionTenant('secret-audit-test', 'زياد حاتم', 'ziad@secretaudit.com', $secretPassword);
         $tenant = $result['tenant'];
 
@@ -463,8 +463,8 @@ class Sprint2OnboardingTest extends TestCase
         // Cleanup
         $request->delete();
         $platformAdmin->delete();
-        \App\Models\Tenant::withoutEvents(function () use ($slug) {
-            \App\Models\Tenant::find($slug)?->delete();
+        Tenant::withoutEvents(function () use ($slug) {
+            Tenant::find($slug)?->delete();
         });
     }
 
@@ -485,8 +485,8 @@ class Sprint2OnboardingTest extends TestCase
             'token_expires_at' => now()->addDays(1),
         ]);
 
-        \App\Models\Tenant::withoutEvents(function () use ($slug) {
-            \App\Models\Tenant::create([
+        Tenant::withoutEvents(function () use ($slug) {
+            Tenant::create([
                 'id' => $slug,
                 'name' => 'شركة التفعيل',
                 'status' => null,

@@ -2,9 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Models\PlatformUser;
 use App\Models\Tenant;
 use App\Services\TenantProvisioningService;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -30,11 +32,11 @@ class DatabaseSeeder extends Seeder
         }
 
         // Seed Platform Admin
-        if (\App\Models\PlatformUser::count() === 0) {
-            \App\Models\PlatformUser::create([
+        if (PlatformUser::count() === 0) {
+            PlatformUser::create([
                 'name' => 'مدير المنصة',
                 'email' => 'admin@platform.local',
-                'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+                'password' => Hash::make('password123'),
             ]);
         }
     }

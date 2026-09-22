@@ -22,14 +22,14 @@ class AuditLogTest extends TestCase
 
         $service = new TenantProvisioningService;
         $this->tenantId = 'auditsuite'.rand(1000, 9999);
-        \App\Models\Tenant::unsetEventDispatcher();
-        \App\Models\Tenant::firstOrCreate([
+        Tenant::unsetEventDispatcher();
+        Tenant::firstOrCreate([
             'id' => $this->tenantId,
         ], [
             'name' => 'شركة السجل والتدقيق',
             'status' => null,
         ]);
-        \App\Models\Tenant::setEventDispatcher(app('events'));
+        Tenant::setEventDispatcher(app('events'));
         $res = $service->provisionTenant($this->tenantId, 'مدير تدقيق الأمان', "admin@{$this->tenantId}.com", 'password123');
         $this->tenant = $res['tenant'];
     }

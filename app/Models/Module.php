@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Module extends Model
 {
     protected $primaryKey = 'code';
+
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [

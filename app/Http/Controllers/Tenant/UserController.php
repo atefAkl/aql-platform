@@ -5,16 +5,15 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\Role;
 use App\Models\Permission;
+use App\Models\Role;
+use App\Models\User;
 use App\Services\AuditLogService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
-
-use Illuminate\Support\Facades\Gate;
 
 class UserController extends Controller
 {
@@ -50,7 +49,6 @@ class UserController extends Controller
             'role_id' => ['nullable', 'exists:roles,id'],
         ]);
 
-
         $role = $validated['role_id'] ? Role::find($validated['role_id']) : null;
 
         $user = User::create([
@@ -70,8 +68,8 @@ class UserController extends Controller
         AuditLogService::record(
             'USER_CREATED',
             'User',
-            $user->id . '',
-            "تم إضافة موظف جديد: {$user->name} ({$user->email}) وتعيين الدور الوظيفي: " . ($role?->name ?? 'عضو فريق')
+            $user->id.'',
+            "تم إضافة موظف جديد: {$user->name} ({$user->email}) وتعيين الدور الوظيفي: ".($role?->name ?? 'عضو فريق')
         );
 
         return back()->with('success', 'تم إضافة الموظف وتعيين دوره الوظيفي بنجاح.');
@@ -106,7 +104,7 @@ class UserController extends Controller
         AuditLogService::record(
             'PERMISSIONS_UPDATED',
             'User',
-            $user->id . '',
+            $user->id.'',
             "تحديث الدور والصلاحيات المباشرة للموظف: {$user->name}",
             [
                 'role' => $role?->name,
