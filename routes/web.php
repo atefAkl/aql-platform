@@ -16,35 +16,33 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// Root Domain Dispatcher (Central -> /admin/dashboard or /onboarding | Tenant -> /users or /login)
+// Root Domain Dispatcher (Central -> Landing Page for all visitors | Tenant -> /users or /login)
 Route::get('/', function (Request $request) {
     $centralDomains = config('tenancy.central_domains', []);
     if (in_array($request->getHost(), $centralDomains, true)) {
-        if (auth('platform')->check()) {
-            return redirect()->route('platform.dashboard');
-        }
-
-        return redirect('/onboarding');
+        return inertia('Platform/Landing');
     }
 
     if (auth('web')->check()) {
-        return redirect()->route('users.index');
+        return redirect()->intended('/users');
     }
 
     return redirect('/login');
 });
 
-// Onboarding Registration Routes (Central Domain Only - Tenant subdomains redirect to /login)
+// Explicit Landing Page Route (Accessible to everyone)
+Route::get('/landing', function () {
+    return inertia('Platform/Landing');
+})->name('landing');
+
+// Onboarding Registration Routes (Central Domain Only - Public Access)
 Route::get('/onboarding', function (Request $request) {
     $centralDomains = config('tenancy.central_domains', []);
     if (! in_array($request->getHost(), $centralDomains, true)) {
         return redirect('/login');
     }
 
-    if (auth('platform')->check()) {
-        return redirect()->route('platform.dashboard');
-    }
-
+    // Public Route - Accessible to all visitors without forced redirect
     return app(OnboardingController::class)->create();
 })->name('onboarding');
 
@@ -57,7 +55,7 @@ Route::post('/onboarding', function (Request $request) {
     return app(OnboardingController::class)->store($request);
 });
 
-// Account Activation Routes
+// Account Activation Routes (Public Access)
 Route::get('/activation/{token}', [ActivationController::class, 'show'])->name('activation.show');
 Route::post('/activation/{token}', [ActivationController::class, 'store'])->name('activation.store');
 
@@ -66,16 +64,22 @@ Route::get('/login', function (Request $request) {
     $centralDomains = config('tenancy.central_domains', []);
     if (in_array($request->getHost(), $centralDomains, true)) {
         if (auth('platform')->check()) {
-            return redirect()->route('platform.dashboard');
+            return redirect()->intended('/admin/dashboard');
         }
     } else {
         if (auth('web')->check()) {
-            return redirect()->route('users.index');
+            return redirect()->intended('/users');
         }
     }
 
     return app(UnifiedLoginController::class)->create($request);
 })->name('login');
+
+// Alias route for /admin/login -> redirect to /login to prevent 404
+Route::get('/admin/login', function () {
+    return redirect('/login');
+});
+
 Route::post('/login', [UnifiedLoginController::class, 'store']);
 Route::post('/logout', [UnifiedLoginController::class, 'destroy'])->name('logout');
 

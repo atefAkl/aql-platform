@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Tenant;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -36,17 +35,20 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = $request->user('platform') ?? $request->user('web') ?? $request->user();
+
         return array_merge(parent::share($request), [
             'auth' => [
-                'user' => $request->user() ? [
-                    'id' => $request->user()->id,
-                    'name' => $request->user()->name,
-                    'email' => $request->user()->email,
-                    'role_title' => $request->user()->role_title ?? 'Platform Admin',
-                    'permissions' => method_exists($request->user(), 'permissions') && $request->user()->permissions
-                        ? $request->user()->permissions->pluck('code')
+                'user' => $user ? [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role_title' => $user->role_title ?? ($request->user('platform') ? 'Platform Admin' : 'User'),
+                    'permissions' => method_exists($user, 'permissions') && $user->permissions
+                        ? $user->permissions->pluck('code')
                         : [],
                 ] : null,
+                'guard' => $request->user('platform') ? 'platform' : ($request->user('web') ? 'web' : null),
             ],
             'tenant' => function () {
                 return function_exists('tenant') && tenant() ? [
