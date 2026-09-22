@@ -1,6 +1,6 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { Building2, Clock, CheckCircle, PauseCircle, Users, LayoutDashboard, ArrowLeft } from 'lucide-react';
+import { Building2, Clock, CheckCircle, PauseCircle, Users, LayoutDashboard, ArrowLeft, Globe } from 'lucide-react';
 import PlatformLayout from '../../Layouts/PlatformLayout';
 import { StatCard } from '../../Components/Molecules/StatCard';
 import { Button } from '../../Components/Atoms/Button';
@@ -34,10 +34,16 @@ export default function Dashboard({ stats }: Props) {
                         مرحباً بك في المركز الرئيسي لإدارة منصة عقل لخدمات Cloud SaaS
                     </p>
                 </div>
-                <div>
+                <div className="flex items-center gap-2.5">
+                    <Link href="/">
+                        <Button variant="secondary" size="sm" className="gap-2">
+                            <Globe className="w-4 h-4 text-indigo-500" />
+                            <span>الصفحة الرئيسية للموقع</span>
+                        </Button>
+                    </Link>
                     <Link href="/admin/requests">
                         <Button variant="primary" size="sm" className="gap-2">
-                            إدارة طلبات التسجيل
+                            <span>إدارة طلبات التسجيل</span>
                             <ArrowLeft className="w-4 h-4" />
                         </Button>
                     </Link>

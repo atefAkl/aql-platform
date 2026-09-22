@@ -197,25 +197,28 @@ class Sprint2OnboardingTest extends TestCase
      */
     public function test_7_no_tenant_means_no_arbitrary_tenant_selection()
     {
+        $slugA = 'corp-one-'.strtolower(Str::random(5));
+        $slugB = 'corp-two-'.strtolower(Str::random(5));
+
         $service = new TenantProvisioningService;
         Tenant::unsetEventDispatcher();
         Tenant::firstOrCreate([
-            'id' => 'corp-one',
+            'id' => $slugA,
         ], [
             'name' => 'Corp One',
             'status' => null,
         ]);
         Tenant::setEventDispatcher(app('events'));
-        $resA = $service->provisionTenant('corp-one', 'Admin 1', 'admin1@one.com', 'Pass123!');
+        $resA = $service->provisionTenant($slugA, 'Admin 1', 'admin1@one.com', 'Pass123!');
         Tenant::unsetEventDispatcher();
         Tenant::firstOrCreate([
-            'id' => 'corp-two',
+            'id' => $slugB,
         ], [
             'name' => 'Corp Two',
             'status' => null,
         ]);
         Tenant::setEventDispatcher(app('events'));
-        $resB = $service->provisionTenant('corp-two', 'Admin 2', 'admin2@two.com', 'Pass123!');
+        $resB = $service->provisionTenant($slugB, 'Admin 2', 'admin2@two.com', 'Pass123!');
         $tenantA = $resA['tenant'];
         $tenantB = $resB['tenant'];
 
@@ -225,7 +228,8 @@ class Sprint2OnboardingTest extends TestCase
         }
 
         $response = $this->get('/');
-        $response->assertRedirect('/onboarding');
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => $page->component('Platform/Landing'));
         $this->assertNull(tenant(), 'System MUST NOT select first active tenant when no tenant context exists.');
 
         // Cleanup

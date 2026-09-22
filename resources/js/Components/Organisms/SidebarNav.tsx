@@ -47,23 +47,22 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ darkMode, setDarkMode })
 
     const navigationItems: MainMenuItem[] = [
         {
+            id: 'landing',
+            label: 'الصفحة الرئيسية للموقع',
+            icon: <Globe className="w-4 h-4 text-indigo-500" />,
+            href: '/',
+        },
+        {
             id: 'dashboard',
-            label: 'لوحة التحكم الرئيسية',
+            label: 'لوحة التحكم المركزية',
             icon: <LayoutDashboard className="w-4 h-4 text-blue-500" />,
-            children: [
-                {
-                    id: 'dashboard-home',
-                    label: 'الرئيسية',
-                    icon: <Home className="w-4 h-4 text-amber-500" />,
-                    href: '/admin/dashboard',
-                },
-                {
-                    id: 'requests',
-                    label: 'طلبات التسجيل',
-                    icon: <FileText className="w-4 h-4 text-amber-500" />,
-                    href: '/admin/requests',
-                },
-            ],
+            href: '/admin/dashboard',
+        },
+        {
+            id: 'requests',
+            label: 'طلبات التسجيل',
+            icon: <FileText className="w-4 h-4 text-amber-500" />,
+            href: '/admin/requests',
         },
         {
             id: 'tenants',
