@@ -7,6 +7,7 @@ use App\Http\Controllers\Platform\ChangelogController;
 use App\Http\Controllers\Platform\DashboardController;
 use App\Http\Controllers\Platform\RegistrationRequestController;
 use App\Http\Controllers\Platform\TenantLifecycleController;
+use App\Http\Controllers\Shared\LocaleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -54,6 +55,9 @@ Route::post('/onboarding', function (Request $request) {
 
     return app(OnboardingController::class)->store($request);
 });
+
+// Language Switcher Route
+Route::post('/locale', [LocaleController::class, 'update'])->name('locale.update');
 
 // Account Activation Routes (Public Access)
 Route::get('/activation/{token}', [ActivationController::class, 'show'])->name('activation.show');

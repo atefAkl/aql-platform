@@ -40,7 +40,7 @@ export default function Onboarding({ central_domain }: { central_domain: string 
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-between transition-colors duration-200" dir="rtl">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-between transition-colors duration-200">
             <Head title="تسجيل مؤسسة جديدة - AQL Platform" />
 
             {/* Top Navigation Bar */}
@@ -136,7 +136,7 @@ export default function Onboarding({ central_domain }: { central_domain: string 
                                         value={data.slug}
                                         onChange={handleSlugChange}
                                         placeholder="مثال: acme-corp"
-                                        className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-left"
+                                        className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-end"
                                         dir="ltr"
                                     />
                                     {data.slug && (
@@ -162,14 +162,14 @@ export default function Onboarding({ central_domain }: { central_domain: string 
                                         اسم المسئول <span className="text-rose-500">*</span>
                                     </label>
                                     <div className="relative">
-                                        <User className="w-4 h-4 text-slate-400 absolute right-3 top-3" />
+                                        <User className="w-4 h-4 text-slate-400 absolute start-3 top-3" />
                                         <input
                                             type="text"
                                             required
                                             value={data.admin_name}
                                             onChange={(e) => setData('admin_name', e.target.value)}
                                             placeholder="أحمد محمود"
-                                            className="w-full pr-9 pl-3.5 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            className="w-full ps-9 pe-3.5 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         />
                                     </div>
                                     {errors.admin_name && <p className="text-xs text-rose-500 mt-1">{errors.admin_name}</p>}
@@ -180,14 +180,14 @@ export default function Onboarding({ central_domain }: { central_domain: string 
                                         البريد الإلكتروني <span className="text-rose-500">*</span>
                                     </label>
                                     <div className="relative">
-                                        <Mail className="w-4 h-4 text-slate-400 absolute right-3 top-3" />
+                                        <Mail className="w-4 h-4 text-slate-400 absolute start-3 top-3" />
                                         <input
                                             type="email"
                                             required
                                             value={data.admin_email}
                                             onChange={(e) => setData('admin_email', e.target.value)}
                                             placeholder="admin@acme.com"
-                                            className="w-full pr-9 pl-3.5 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-left"
+                                            className="w-full ps-9 pe-3.5 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-end"
                                             dir="ltr"
                                         />
                                     </div>

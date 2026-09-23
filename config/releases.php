@@ -12,6 +12,36 @@ return [
     */
 
     [
+        'version' => 'v0.5.0',
+        'sprint' => 'Sprint 05',
+        'title' => 'البنية الأساسية لتعدد اللغات والاتجاه الديناميكي (Language Infrastructure & Dynamic Direction)',
+        'date' => '2026-09-23',
+        'status' => 'RELEASED',
+        'summary' => 'بناء النواة الأساسية لدعم تعدد اللغات (N-Languages Ready) وتحديد الاتجاه الديناميكي (RTL/LTR) مع الاحتفاظ بالسياق، وتوفير أدوات تبديل اللغة، وتطبيقها بالكامل على واجهات المنصة والمستأجرين.',
+        'categories' => [
+            'added' => [
+                'label' => 'ما الجديد',
+                'items' => [
+                    'بناء SetAppLocale Middleware لتحديد اللغة من الجلسة أو الـ Cookie بشكل آمن.',
+                    'تمرير ترجمات المنصة (platform) والمستأجر (tenant) واللغة الحالية والاتجاه إلى واجهة React عبر HandleInertiaRequests.',
+                    'دعم اللغتين العربية (ar) والإنجليزية (en) كبداية مع قابلية التوسع لملفات لغات إضافية مستقبلاً.',
+                    'إضافة Hook مخصص (useTranslation) ومكون LanguageSwitcher لاختيار اللغة.',
+                    'ترجمة واجهات المنصة المركزية بالكامل (Platform UI).',
+                    'ترجمة واجهات المستأجرين (Tenant UI) بالكامل، بما في ذلك إدارة الموظفين والأدوار والصلاحيات (Hybrid Roles).',
+                ],
+            ],
+            'changed' => [
+                'label' => 'التغييرات المعمارية',
+                'items' => [
+                    'الاعتماد على Server-resolved Locale لتغيير خصائص lang و dir ديناميكياً في جذر الـ HTML بدون إعادة تحميل الصفحة (Event-Driven).',
+                    'إزالة التنسيقات غير المتجاوبة (Physical Direction Classes & dir Attributes) والاعتماد على الخصائص المنطقية (Logical Properties) لضمان استجابة مرنة للـ Layout.',
+                    'عزل سياق اللغة (Language Context) تماماً عن سياق المصادقة (Auth Context) وسياق المستأجر (Tenant Context).',
+                ],
+            ],
+        ],
+    ],
+
+    [
         'version' => 'v0.4.0',
         'sprint' => 'Sprint 04',
         'title' => 'إدارة دورة حياة المستأجر وحظر الكتابة عند التعليق (Tenant Lifecycle & Write-Blocker)',

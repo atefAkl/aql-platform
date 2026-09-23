@@ -62,6 +62,18 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
             ],
+
+            // Language & Localization
+            'locale' => fn () => app()->getLocale(),
+            'direction' => fn () => config('localization.supported.'.app()->getLocale().'.dir', 'rtl'),
+            'supported_locales' => fn () => config('localization.supported', []),
+            'translations' => function () {
+                return [
+                    'common' => __('common'),
+                    'platform' => __('platform'),
+                    'tenant' => __('tenant'),
+                ];
+            },
         ]);
     }
 }

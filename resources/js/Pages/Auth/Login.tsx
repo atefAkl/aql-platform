@@ -28,7 +28,7 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4 font-sans" dir="rtl">
+        <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4 font-sans">
             <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl space-y-6">
                 
                 {/* Header - Tenant Workspace Identity */}
@@ -49,12 +49,12 @@ export default function Login() {
                     <div>
                         <label className="block text-xs font-semibold text-slate-300 mb-1">البريد الإلكتروني لمستخدم المؤسسة</label>
                         <div className="relative">
-                            <Mail className="w-4 h-4 text-slate-500 absolute right-3 top-3" />
+                            <Mail className="w-4 h-4 text-slate-500 absolute start-3 top-3" />
                             <input
                                 type="email"
                                 value={data.email}
                                 onChange={(e) => setData('email', e.target.value)}
-                                className="w-full bg-slate-950 border border-slate-800 rounded-xl pr-10 pl-3 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-colors"
+                                className="w-full bg-slate-950 border border-slate-800 rounded-xl ps-10 pe-3 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-colors"
                                 placeholder="user@company.com"
                                 required
                                 dir="ltr"
@@ -66,12 +66,12 @@ export default function Login() {
                     <div>
                         <label className="block text-xs font-semibold text-slate-300 mb-1">كلمة المرور</label>
                         <div className="relative">
-                            <Lock className="w-4 h-4 text-slate-500 absolute right-3 top-3" />
+                            <Lock className="w-4 h-4 text-slate-500 absolute start-3 top-3" />
                             <input
                                 type={showPassword ? 'text' : 'password'}
                                 value={data.password}
                                 onChange={(e) => setData('password', e.target.value)}
-                                className="w-full bg-slate-950 border border-slate-800 rounded-xl pr-10 pl-10 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-colors"
+                                className="w-full bg-slate-950 border border-slate-800 rounded-xl ps-10 pe-10 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition-colors"
                                 placeholder="••••••••"
                                 required
                                 dir="ltr"
@@ -79,7 +79,7 @@ export default function Login() {
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute left-3 top-2.5 text-slate-500 hover:text-slate-300 transition-colors p-0.5 rounded"
+                                className="absolute end-3 top-2.5 text-slate-500 hover:text-slate-300 transition-colors p-0.5 rounded"
                                 title={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
                             >
                                 {showPassword ? (

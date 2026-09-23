@@ -3,6 +3,7 @@ import { Modal } from '../Atoms/Modal';
 import { Badge } from '../Atoms/Badge';
 import { Button } from '../Atoms/Button';
 import { Building2, User, Mail, Globe, Calendar, Key, CheckCircle, Ban, Trash2 } from 'lucide-react';
+import { useTranslation } from '../../Hooks/useTranslation';
 
 export interface RegistrationRequestData {
     id: number;
@@ -33,13 +34,14 @@ export const RegistrationRequestDetailsModal: React.FC<RegistrationRequestDetail
     onReject,
     onDelete,
 }) => {
+    const { t, locale } = useTranslation();
     if (!request) return null;
 
     const centralDomain = 'aql-platform.local';
     const domainUrl = `${request.slug}.${centralDomain}`;
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="تفاصيل طلب تسجيل المؤسسة" maxWidth="lg">
+        <Modal isOpen={isOpen} onClose={onClose} title={t('platform.requests.modal.title')} maxWidth="lg">
             <div className="space-y-6 text-xs md:text-sm">
                 {/* Header Summary */}
                 <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800">
@@ -49,18 +51,11 @@ export const RegistrationRequestDetailsModal: React.FC<RegistrationRequestDetail
                         </div>
                         <div>
                             <h4 className="font-bold text-slate-900 dark:text-slate-100">{request.organization_name}</h4>
-                            <p className="text-slate-500 dark:text-slate-400 font-mono text-xs">{domainUrl}</p>
+                            <p className="text-slate-500 dark:text-slate-400 font-mono text-xs" dir="ltr">{domainUrl}</p>
                         </div>
                     </div>
                     <Badge variant={request.status}>
-                        {
-                            {
-                                pending: 'قيد الانتظار',
-                                approved: 'معتمد / بانتظار التفعيل',
-                                completed: 'مكتمل',
-                                rejected: 'مرفوض',
-                            }[request.status as string] || request.status || 'مجهول'
-                        }
+                        {t(`platform.status.${request.status}`)}
                     </Badge>
                 </div>
 
@@ -69,7 +64,7 @@ export const RegistrationRequestDetailsModal: React.FC<RegistrationRequestDetail
                     <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800">
                         <div className="flex items-center gap-2 text-slate-400 mb-1">
                             <User className="w-3.5 h-3.5 text-blue-500" />
-                            <span className="text-[11px] font-medium">مسؤول النظام الرئيسي</span>
+                            <span className="text-[11px] font-medium">{t('platform.requests.modal.admin_name')}</span>
                         </div>
                         <p className="font-semibold text-slate-800 dark:text-slate-200">{request.admin_name}</p>
                     </div>
@@ -77,25 +72,25 @@ export const RegistrationRequestDetailsModal: React.FC<RegistrationRequestDetail
                     <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800">
                         <div className="flex items-center gap-2 text-slate-400 mb-1">
                             <Mail className="w-3.5 h-3.5 text-emerald-500" />
-                            <span className="text-[11px] font-medium">البريد الإلكتروني</span>
+                            <span className="text-[11px] font-medium">{t('platform.requests.modal.admin_email')}</span>
                         </div>
-                        <p className="font-semibold text-slate-800 dark:text-slate-200 font-mono">{request.admin_email}</p>
+                        <p className="font-semibold text-slate-800 dark:text-slate-200 font-mono" dir="ltr">{request.admin_email}</p>
                     </div>
 
                     <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800">
                         <div className="flex items-center gap-2 text-slate-400 mb-1">
                             <Globe className="w-3.5 h-3.5 text-indigo-500" />
-                            <span className="text-[11px] font-medium">معرف النطاق (Slug)</span>
+                            <span className="text-[11px] font-medium">{t('platform.requests.modal.slug')}</span>
                         </div>
-                        <p className="font-semibold text-slate-800 dark:text-slate-200 font-mono">{request.slug}</p>
+                        <p className="font-semibold text-slate-800 dark:text-slate-200 font-mono" dir="ltr">{request.slug}</p>
                     </div>
 
                     <div className="p-3.5 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-800">
                         <div className="flex items-center gap-2 text-slate-400 mb-1">
                             <Calendar className="w-3.5 h-3.5 text-amber-500" />
-                            <span className="text-[11px] font-medium">تاريخ تقديم الطلب</span>
+                            <span className="text-[11px] font-medium">{t('platform.requests.modal.date')}</span>
                         </div>
-                        <p className="font-semibold text-slate-800 dark:text-slate-200">{new Date(request.created_at).toLocaleDateString('ar-EG')}</p>
+                        <p className="font-semibold text-slate-800 dark:text-slate-200">{new Date(request.created_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}</p>
                     </div>
                 </div>
 
@@ -104,9 +99,9 @@ export const RegistrationRequestDetailsModal: React.FC<RegistrationRequestDetail
                     <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl space-y-2">
                         <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold">
                             <Key className="w-4 h-4" />
-                            <span>رابط التفعيل الخاص بالمؤسسة</span>
+                            <span>{t('platform.requests.modal.activation_link')}</span>
                         </div>
-                        <div className="p-2.5 bg-white dark:bg-slate-900 rounded-xl border border-emerald-500/30 text-xs font-mono break-all text-slate-700 dark:text-slate-300">
+                        <div className="p-2.5 bg-white dark:bg-slate-900 rounded-xl border border-emerald-500/30 text-xs font-mono break-all text-slate-700 dark:text-slate-300" dir="ltr">
                             http://{domainUrl}/activation/{request.activation_token}
                         </div>
                     </div>
@@ -118,13 +113,13 @@ export const RegistrationRequestDetailsModal: React.FC<RegistrationRequestDetail
                         {onApprove && request.status === 'pending' && (
                             <Button variant="success" size="sm" onClick={() => { onClose(); onApprove(request); }}>
                                 <CheckCircle className="w-4 h-4" />
-                                <span>اعتماد وتفعيل</span>
+                                <span>{t('platform.actions.approve')}</span>
                             </Button>
                         )}
                         {onReject && request.status === 'pending' && (
                             <Button variant="danger" size="sm" onClick={() => { onClose(); onReject(request); }}>
                                 <Ban className="w-4 h-4" />
-                                <span>رفض الطلب</span>
+                                <span>{t('platform.actions.reject')}</span>
                             </Button>
                         )}
                     </div>
@@ -133,11 +128,11 @@ export const RegistrationRequestDetailsModal: React.FC<RegistrationRequestDetail
                         {onDelete && (
                             <Button variant="danger" size="sm" onClick={() => { onClose(); onDelete(request); }}>
                                 <Trash2 className="w-4 h-4" />
-                                <span>حذف</span>
+                                <span>{t('platform.actions.delete')}</span>
                             </Button>
                         )}
                         <Button variant="outline" size="sm" onClick={onClose}>
-                            إغلاق
+                            {t('platform.requests.modal.close')}
                         </Button>
                     </div>
                 </div>

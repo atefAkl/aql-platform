@@ -8,6 +8,7 @@ import { ActionDropdown } from '../../../Components/Molecules/ActionDropdown';
 import { ConfirmDialog } from '../../../Components/Molecules/ConfirmDialog';
 import { RegistrationRequestDetailsModal, RegistrationRequestData } from '../../../Components/Organisms/RegistrationRequestDetailsModal';
 import { Building2, Clock, CheckCircle, Ban, Search, Filter, ShieldAlert, Plus } from 'lucide-react';
+import { useTranslation } from '../../../Hooks/useTranslation';
 
 interface IndexProps {
     requests: RegistrationRequestData[];
@@ -15,6 +16,7 @@ interface IndexProps {
 }
 
 export default function RegistrationRequestsIndex({ requests, currentFilter = 'all' }: IndexProps) {
+    const { t, locale } = useTranslation();
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedRequest, setSelectedRequest] = useState<RegistrationRequestData | null>(null);
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
@@ -86,61 +88,60 @@ export default function RegistrationRequestsIndex({ requests, currentFilter = 'a
 
     return (
         <PlatformLayout>
-            <Head title="إدارة طلبات تسجيل المؤسسات" />
+            <Head title={t('platform.requests.title')} />
 
-            <div className="space-y-6" dir="rtl">
-                {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                        <h1 className="text-xl md:text-2xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2.5">
-                            <Building2 className="w-6 h-6 text-blue-500" />
-                            طلبات تسجيل المؤسسات والمستأجرين
-                        </h1>
-                        <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                            عرض وإدارة وتفعيل أو تعطيل طلبات التسجيل المقدمة للإنضمام إلى منصة AQL Platform
-                        </p>
-                    </div>
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+                <div>
+                    <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                        <Building2 className="w-6 h-6 text-blue-500" />
+                        {t('platform.requests.header_title')}
+                    </h1>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        {t('platform.requests.header_subtitle')}
+                    </p>
                 </div>
+            </div>
 
-                {/* Stat Overview Cards (Temporarily Hidden per Request) */}
-                {/* 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="space-y-6">
+                
+                {/* Stats Section */}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                     <StatCard 
-                        title="إجمالي الطلبات"
+                        title={t('platform.requests.stats.total')}
                         value={totalCount}
-                        icon={<Building2 className="w-5 h-5" />}
-                        colorScheme="indigo"
+                        icon={<Building2 className="w-4 h-4" />}
+                        color="indigo"
                     />
                     <StatCard 
-                        title="طلبات قيد الانتظار"
+                        title={t('platform.requests.stats.pending')}
                         value={pendingCount}
-                        icon={<Clock className="w-5 h-5" />}
-                        colorScheme="amber"
-                        subtext="بانتظار موافقة الإدارة"
+                        subtext={t('platform.requests.stats.pending_subtext')}
+                        icon={<Clock className="w-4 h-4" />}
+                        color="amber"
                     />
                     <StatCard 
-                        title="طلبات بانتظار التفعيل"
+                        title={t('platform.requests.stats.approved')}
                         value={approvedCount}
-                        icon={<CheckCircle className="w-5 h-5" />}
-                        colorScheme="emerald"
-                        subtext="تم التفعيل وإرسال الرابط"
+                        subtext={t('platform.requests.stats.approved_subtext')}
+                        icon={<CheckCircle className="w-4 h-4" />}
+                        color="blue"
                     />
                     <StatCard 
-                        title="مؤسسات تم تفعيلها"
+                        title={t('platform.requests.stats.completed')}
                         value={completedCount}
-                        icon={<CheckCircle className="w-5 h-5" />}
-                        colorScheme="emerald"
-                        subtext="تم التجهيز والتشغيل"
+                        subtext={t('platform.requests.stats.completed_subtext')}
+                        icon={<CheckCircle className="w-4 h-4" />}
+                        color="emerald"
                     />
                     <StatCard 
-                        title="طلبات مرفوضة"
+                        title={t('platform.requests.stats.rejected')}
                         value={rejectedCount}
-                        icon={<Ban className="w-5 h-5" />}
-                        colorScheme="rose"
-                        subtext="مرفوضة نهائياً"
+                        subtext={t('platform.requests.stats.rejected_subtext')}
+                        icon={<Ban className="w-4 h-4" />}
+                        color="rose"
                     />
                 </div>
-                */}
 
                 {/* Filter Tabs & Search Bar */}
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm space-y-4">
@@ -148,11 +149,11 @@ export default function RegistrationRequestsIndex({ requests, currentFilter = 'a
                         {/* Status Filter Tabs */}
                         <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
                             {[
-                                { id: 'all', label: 'كافة الطلبات', count: totalCount },
-                                { id: 'pending', label: 'قيد الانتظار', count: pendingCount },
-                                { id: 'approved', label: 'بانتظار التفعيل', count: approvedCount },
-                                { id: 'completed', label: 'مكتملة', count: completedCount },
-                                { id: 'rejected', label: 'مرفوضة', count: rejectedCount },
+                                { id: 'all', label: t('platform.requests.tabs.all'), count: totalCount },
+                                { id: 'pending', label: t('platform.requests.tabs.pending'), count: pendingCount },
+                                { id: 'approved', label: t('platform.requests.tabs.approved'), count: approvedCount },
+                                { id: 'completed', label: t('platform.requests.tabs.completed'), count: completedCount },
+                                { id: 'rejected', label: t('platform.requests.tabs.rejected'), count: rejectedCount },
                             ].map(tab => (
                                 <button
                                     key={tab.id}
@@ -175,35 +176,35 @@ export default function RegistrationRequestsIndex({ requests, currentFilter = 'a
 
                         {/* Search Input */}
                         <div className="relative w-full md:w-72">
-                            <Search className="w-4 h-4 text-slate-400 absolute right-3 top-2.5" />
+                            <Search className="w-4 h-4 text-slate-400 absolute start-3 top-2.5" />
                             <input
                                 type="text"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                placeholder="بحث باسم المؤسسة، Slug، أو البريد..."
-                                className="w-full pr-9 pl-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder={t('platform.requests.search_placeholder')}
+                                className="w-full ps-9 pe-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
                     </div>
 
                     {/* Table View */}
                     <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
-                        <table className="w-full text-right text-xs md:text-sm">
+                        <table className="w-full text-start text-xs md:text-sm">
                             <thead className="bg-slate-100/70 dark:bg-slate-950/70 text-slate-600 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-slate-800">
                                 <tr>
-                                    <th className="px-4 py-3">المؤسسة</th>
-                                    <th className="px-4 py-3">النطاق (Slug)</th>
-                                    <th className="px-4 py-3">المدير الرئيسي</th>
-                                    <th className="px-4 py-3">تاريخ الطلب</th>
-                                    <th className="px-4 py-3">الحالة</th>
-                                    <th className="px-4 py-3 text-center">الإجراءات</th>
+                                    <th className="px-4 py-3">{t('platform.requests.table.organization')}</th>
+                                    <th className="px-4 py-3">{t('platform.requests.table.slug')}</th>
+                                    <th className="px-4 py-3">{t('platform.requests.table.admin')}</th>
+                                    <th className="px-4 py-3">{t('platform.requests.table.date')}</th>
+                                    <th className="px-4 py-3">{t('platform.requests.table.status')}</th>
+                                    <th className="px-4 py-3 text-center">{t('platform.requests.table.actions')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                                 {filteredRequests.length === 0 ? (
                                     <tr>
                                         <td colSpan={6} className="px-4 py-12 text-center text-slate-400 dark:text-slate-500">
-                                             لا يوجد طلبات تسجيل مطابقة للبحث أو التصفية الحالية.
+                                            {t('platform.requests.table.empty')}
                                         </td>
                                     </tr>
                                 ) : (
@@ -212,26 +213,19 @@ export default function RegistrationRequestsIndex({ requests, currentFilter = 'a
                                             <td className="px-4 py-3.5 font-bold text-slate-900 dark:text-slate-100">
                                                 {req.organization_name}
                                             </td>
-                                            <td className="px-4 py-3.5 font-mono text-blue-600 dark:text-blue-400 text-xs dir-ltr text-right">
-                                                {req.slug}.aql-platform.local
+                                            <td className="px-4 py-3.5 font-mono text-blue-600 dark:text-blue-400 text-xs text-start">
+                                                <span dir="ltr">{req.slug}.aql-platform.local</span>
                                             </td>
                                             <td className="px-4 py-3.5">
                                                 <div className="font-semibold text-slate-800 dark:text-slate-200">{req.admin_name}</div>
                                                 <div className="text-[11px] text-slate-400 font-mono">{req.admin_email}</div>
                                             </td>
                                             <td className="px-4 py-3.5 text-slate-500 dark:text-slate-400 text-xs">
-                                                {new Date(req.created_at).toLocaleDateString('ar-EG')}
+                                                {new Date(req.created_at).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}
                                             </td>
                                             <td className="px-4 py-3.5">
                                                 <Badge variant={req.status}>
-                                                    {
-                                                        {
-                                                            pending: 'قيد الانتظار',
-                                                            approved: 'بانتظار التفعيل',
-                                                            completed: 'مكتمل',
-                                                            rejected: 'مرفوض',
-                                                        }[req.status as string] || req.status || 'مجهول'
-                                                    }
+                                                    {t(`platform.status.${req.status}`)}
                                                 </Badge>
                                             </td>
                                             <td className="px-4 py-3.5 text-center">
@@ -272,19 +266,19 @@ export default function RegistrationRequestsIndex({ requests, currentFilter = 'a
                     onConfirm={handleExecuteAction}
                     isLoading={isSubmitting}
                     title={
-                        confirmAction.type === 'approve' ? 'تأكيد اعتماد وتفعيل الطلب' :
-                        confirmAction.type === 'reject' ? 'تأكيد رفض الطلب' :
-                        'تأكيد حذف طلب التسجيل'
+                        confirmAction.type === 'approve' ? t('platform.requests.confirm.approve_title') :
+                        confirmAction.type === 'reject' ? t('platform.requests.confirm.reject_title') :
+                        t('platform.requests.confirm.delete_title')
                     }
                     description={
-                        confirmAction.type === 'approve' ? `هل أنت متأكد من موافقتك على طلب تسجيل مؤسسة (${confirmAction.request.organization_name}) وتوليد رابط التفعيل؟` :
-                        confirmAction.type === 'reject' ? `هل تريد حقاً رفض طلب تسجيل مؤسسة (${confirmAction.request.organization_name})؟ هذا الإجراء نهائي ولا يمكن التراجع عنه.` :
-                        `هل أنت متأكد من حذف طلب تسجيل مؤسسة (${confirmAction.request.organization_name})؟ سيتم مسح الطلب وسجل المؤسسة المرتبط به نهائياً.`
+                        confirmAction.type === 'approve' ? t('platform.requests.confirm.approve_message', { name: confirmAction.request.organization_name }) :
+                        confirmAction.type === 'reject' ? t('platform.requests.confirm.reject_message', { name: confirmAction.request.organization_name }) :
+                        t('platform.requests.confirm.delete_message', { name: confirmAction.request.organization_name })
                     }
                     confirmText={
-                        confirmAction.type === 'approve' ? 'نعم، اعتماد الطلب' :
-                        confirmAction.type === 'reject' ? 'نعم، رفض الطلب' :
-                        'نعم، حذف الطلب'
+                        confirmAction.type === 'approve' ? t('platform.requests.confirm.approve_confirm') :
+                        confirmAction.type === 'reject' ? t('platform.requests.confirm.reject_confirm') :
+                        t('platform.requests.confirm.delete_confirm')
                     }
                     variant={confirmAction.type === 'approve' ? 'primary' : 'danger'}
                 />
