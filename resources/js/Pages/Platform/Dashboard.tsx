@@ -1,9 +1,10 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { Building2, Clock, CheckCircle, PauseCircle, Users, LayoutDashboard, ArrowLeft, Globe } from 'lucide-react';
+import { Building2, Clock, CheckCircle, PauseCircle, Users, LayoutDashboard, ArrowLeft, ArrowRight, Globe } from 'lucide-react';
 import PlatformLayout from '../../Layouts/PlatformLayout';
 import { StatCard } from '../../Components/Molecules/StatCard';
 import { Button } from '../../Components/Atoms/Button';
+import { useTranslation } from '../../Hooks/useTranslation';
 
 interface Stats {
     total_tenants: number;
@@ -19,84 +20,38 @@ interface Props {
 }
 
 export default function Dashboard({ stats }: Props) {
+    const { t } = useTranslation();
+
     return (
         <PlatformLayout>
-            <Head title="لوحة التحكّم الرئيسية" />
+            <Head title={t('platform.dashboard.title')} />
 
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                         <LayoutDashboard className="w-6 h-6 text-indigo-500" />
-                        لوحة تحكّم المنصة (Landlord)
+                        {t('platform.dashboard.title')}
                     </h1>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        مرحباً بك في المركز الرئيسي لإدارة منصة عقل لخدمات Cloud SaaS
+                        {t('platform.dashboard.subtitle')}
                     </p>
                 </div>
                 <div className="flex items-center gap-2.5">
                     <Link href="/">
                         <Button variant="secondary" size="sm" className="gap-2">
                             <Globe className="w-4 h-4 text-indigo-500" />
-                            <span>الصفحة الرئيسية للموقع</span>
+                            <span>{t('platform.nav.go_to_dashboard')}</span>
                         </Button>
                     </Link>
                     <Link href="/admin/requests">
                         <Button variant="primary" size="sm" className="gap-2">
-                            <span>إدارة طلبات التسجيل</span>
-                            <ArrowLeft className="w-4 h-4" />
+                            <span>{t('platform.nav.requests')}</span>
+                            <ArrowRight className="w-4 h-4 rtl:rotate-180" />
                         </Button>
                     </Link>
                 </div>
             </div>
-
-            {/* High Level Stats Grid (Temporarily Hidden per Request) */}
-            {/* 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-                <StatCard
-                    title="إجمالي المستأجرين"
-                    value={stats.total_tenants}
-                    icon={<Building2 className="w-5 h-5" />}
-                    colorScheme="indigo"
-                    subtext="المؤسسات المسجلة"
-                />
-                <StatCard
-                    title="المستأجرين النشطين"
-                    value={stats.active_tenants}
-                    icon={<CheckCircle className="w-5 h-5" />}
-                    colorScheme="emerald"
-                    subtext="مستأجرين يعملون حالياً"
-                />
-                <StatCard
-                    title="طلبات قيد الانتظار"
-                    value={stats.pending_requests}
-                    icon={<Clock className="w-5 h-5" />}
-                    colorScheme="amber"
-                    subtext="تتطلب المراجعة"
-                />
-                <StatCard
-                    title="طلبات معتمدة"
-                    value={stats.approved_requests}
-                    icon={<CheckCircle className="w-5 h-5" />}
-                    colorScheme="blue"
-                    subtext="في انتظار تفعيل العميل"
-                />
-                <StatCard
-                    title="طلبات موقوفة"
-                    value={stats.suspended_requests}
-                    icon={<PauseCircle className="w-5 h-5" />}
-                    colorScheme="rose"
-                    subtext="معطلة مؤقتاً"
-                />
-                <StatCard
-                    title="مدراء المنصة"
-                    value={stats.platform_users}
-                    icon={<Users className="w-5 h-5" />}
-                    colorScheme="indigo"
-                    subtext="طاقم إدارة Landlord"
-                />
-            </div>
-            */}
 
             {/* Clean Main Content Placeholder for Future Admin Widgets */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-12 text-center border-dashed">
@@ -105,10 +60,10 @@ export default function Dashboard({ stats }: Props) {
                         <LayoutDashboard className="w-8 h-8" />
                     </div>
                     <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200">
-                        مرحباً بك في لوحة القيادة
+                        {t('platform.dashboard.title')}
                     </h3>
                     <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                        تم تخصيص هذه المساحة للتحليلات المتقدمة ومخططات الأداء ومراقبة خوادم المنصة والتي سيتم إضافتها في المراحل القادمة.
+                        {t('platform.dashboard.subtitle')}
                     </p>
                 </div>
             </div>

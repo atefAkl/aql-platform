@@ -4,25 +4,19 @@ import {
     Building2, 
     ShieldCheck, 
     Zap, 
-    Layers, 
-    ArrowLeft, 
-    CheckCircle2, 
     Globe, 
-    Lock, 
-    Sparkles, 
-    Sun, 
-    Moon, 
-    FileText, 
     Server, 
-    ExternalLink,
-    ChevronLeft,
+    Sparkles, 
     LayoutDashboard
 } from 'lucide-react';
 import { PageProps } from '../../types';
+import { useTranslation } from '../../Hooks/useTranslation';
+import LanguageSwitcher from '../../Components/Molecules/LanguageSwitcher';
 
 export default function Landing() {
     const { props } = usePage<PageProps>();
     const authUser = props.auth?.user;
+    const { t, locale, direction } = useTranslation();
 
     const [darkMode, setDarkMode] = useState<boolean>(() => {
         if (typeof window !== 'undefined') {
@@ -41,8 +35,14 @@ export default function Landing() {
         }
     }, [darkMode]);
 
+    // Sync HTML lang and dir for SPA navigation
+    useEffect(() => {
+        document.documentElement.lang = (locale as string) === 'ar' ? 'ar' : 'en';
+        document.documentElement.dir = (direction as string) || 'rtl';
+    }, [locale, direction]);
+
     return (
-        <div className={`min-h-screen font-sans transition-colors duration-200 ${darkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`} dir="rtl">
+        <div className={`min-h-screen font-sans transition-colors duration-200 ${darkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
             <Head title="منصة AQL Cloud — المنصة السحابية المتقدمة لإدارة المؤسسات" />
 
             {/* Navigation Header */}
@@ -56,34 +56,28 @@ export default function Landing() {
                         </div>
                         <div>
                             <span className="text-lg font-black text-slate-900 dark:text-slate-100 block">منصة AQL</span>
-                            <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 block -mt-1">Cloud Multi-Tenant Platform</span>
+                            <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 block -mt-1 text-start">Cloud Multi-Tenant Platform</span>
                         </div>
                     </Link>
 
                     {/* Nav Links */}
                     <nav className="hidden md:flex items-center gap-8 text-xs font-bold text-slate-600 dark:text-slate-300">
                         <a href="#features" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                            مميزات المنصة
+                            {t('platform.landing.nav_features')}
                         </a>
                         <a href="#architecture" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                            البنية المعمارية
+                            {t('platform.landing.nav_architecture')}
                         </a>
                         <Link href="/changelog" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1.5">
                             <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                            <span>سجل الإصدارات</span>
-                            <span className="px-1.5 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px]">v0.4.0</span>
+                            <span>{t('platform.landing.nav_changelog')}</span>
+                            <span className="px-1.5 py-0.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px]" dir="ltr">v0.5.0</span>
                         </Link>
                     </nav>
 
                     {/* Actions & Theme Toggle */}
                     <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => setDarkMode(!darkMode)}
-                            className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:opacity-80 transition-all"
-                            title="تغيير المظهر"
-                        >
-                            {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-600" />}
-                        </button>
+                        <LanguageSwitcher />
 
                         {authUser ? (
                             <Link
@@ -91,7 +85,7 @@ export default function Landing() {
                                 className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-md flex items-center gap-2"
                             >
                                 <LayoutDashboard className="w-4 h-4" />
-                                <span>لوحة التحكم المركزية</span>
+                                <span>{t('platform.nav.go_to_dashboard')}</span>
                             </Link>
                         ) : (
                             <>
@@ -99,15 +93,13 @@ export default function Landing() {
                                     href="/login"
                                     className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold transition-all shadow-sm"
                                 >
-                                    تسجيل الدخول
+                                    {t('common.actions.login')}
                                 </Link>
-
                                 <Link
                                     href="/onboarding"
-                                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2"
+                                    className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-md hidden sm:flex"
                                 >
-                                    <span>تسجيل مؤسسة</span>
-                                    <ArrowLeft className="w-3.5 h-3.5" />
+                                    {t('common.actions.register')}
                                 </Link>
                             </>
                         )}
@@ -116,120 +108,84 @@ export default function Landing() {
             </header>
 
             {/* Hero Section */}
-            <section className="relative overflow-hidden pt-16 pb-24 lg:pt-24 lg:pb-32">
-                <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-600/15 via-transparent to-transparent pointer-events-none" />
-                
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    
-                    {/* Release Badge Pill */}
-                    <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-bold mb-8 animate-fade-in shadow-sm">
-                        <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
-                        <span>منصة AQL الإصدار الرابع (Sprint 3 Delivered)</span>
-                        <Link href="/changelog" className="inline-flex items-center gap-1 hover:underline text-blue-700 dark:text-blue-300 font-extrabold mr-1">
-                            <span>عرض التحديثات</span>
-                            <ChevronLeft className="w-3 h-3" />
-                        </Link>
-                    </div>
+            <main className="relative overflow-hidden">
+                <div className="absolute inset-0 bg-blue-50/50 dark:bg-blue-900/10 -z-10" />
+                <div className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80">
+                    <div className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]" />
+                </div>
 
-                    {/* Main Headline */}
-                    <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 dark:text-slate-100 max-w-4xl mx-auto leading-tight sm:leading-tight">
-                        المنصة السحابية المتقدمة لإدارة المؤسسات وتعدد المستأجرين
-                    </h1>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-32">
+                    <div className="text-center max-w-4xl mx-auto space-y-8">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-bold mb-4 animate-fade-in border border-blue-200 dark:border-blue-800/60">
+                            <Sparkles className="w-4 h-4" />
+                            {t('platform.landing.hero_badge')}
+                        </div>
+                        
+                        <h1 className="text-5xl sm:text-7xl font-black text-slate-900 dark:text-white tracking-tight animate-slide-up">
+                            {t('platform.landing.hero_title_1')} <br className="hidden sm:block" />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-violet-600 dark:from-blue-400 dark:to-violet-400">
+                                {t('platform.landing.hero_title_2')}
+                            </span>
+                        </h1>
 
-                    {/* Subheadline */}
-                    <p className="mt-6 text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-                        بنية تحتية متكاملة تضمن <strong className="text-blue-600 dark:text-blue-400 font-extrabold">العزل التام للبيانات والهوية</strong>، مع أداء فائق وموديولات أعمال مستقلة سهلة التجهيز والتركيب.
-                    </p>
+                        <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl mx-auto font-medium">
+                            {t('platform.landing.hero_subtitle')}
+                        </p>
 
-                    {/* Action Buttons */}
-                    <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-                        {authUser ? (
+                        <div className="pt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
                             <Link
-                                href="/admin/dashboard"
-                                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 text-white font-bold text-sm shadow-xl shadow-blue-500/25 hover:opacity-95 transition-all flex items-center justify-center gap-3"
+                                href="/onboarding"
+                                className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition-all shadow-xl shadow-blue-500/25 flex items-center justify-center gap-2"
                             >
-                                <LayoutDashboard className="w-5 h-5" />
-                                <span>الانتقال إلى لوحة التحكم المركزية</span>
-                                <ArrowLeft className="w-4 h-4" />
+                                {t('platform.landing.action_register')}
                             </Link>
-                        ) : (
-                            <>
-                                <Link
-                                    href="/onboarding"
-                                    className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 text-white font-bold text-sm shadow-xl shadow-blue-500/25 hover:opacity-95 transition-all flex items-center justify-center gap-3"
-                                >
-                                    <span>ابدأ الآن — تسجيل مؤسسة جديدة</span>
-                                    <ArrowLeft className="w-4 h-4" />
-                                </Link>
-
-                                <Link
-                                    href="/login"
-                                    className="w-full sm:w-auto px-8 py-4 rounded-2xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-bold text-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition-all shadow-sm flex items-center justify-center gap-2"
-                                >
-                                    <Lock className="w-4 h-4 text-slate-400" />
-                                    <span>تسجيل الدخول إلى حسابك</span>
-                                </Link>
-                            </>
-                        )}
-                    </div>
-
-                    {/* Quick Trust Badges */}
-                    <div className="mt-12 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                        <div className="flex items-center gap-2">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                            <span>قواعد بيانات معزولة (Database Per Tenant)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                            <span>نطاقات فرعية مخصصة لكل مؤسسة</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                            <span>تأمين عزل هوية المنصة والمستأجرين</span>
+                            <Link
+                                href="/changelog"
+                                className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm flex items-center justify-center gap-2"
+                            >
+                                {t('platform.landing.action_changelog')}
+                            </Link>
                         </div>
                     </div>
                 </div>
-            </section>
+            </main>
 
-            {/* Platform Features Section */}
-            <section id="features" className="py-20 bg-slate-100/60 dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800">
+            {/* Core Features */}
+            <section id="features" className="py-24 bg-slate-50/50 dark:bg-slate-900/20 border-y border-slate-200 dark:border-slate-800">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    
-                    <div className="text-center max-w-3xl mx-auto mb-16">
-                        <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest block mb-2">مميزات المنصة المركزية</span>
-                        <h2 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-slate-100">
-                            مصممة لأعلى مستويات الأمان والتوسع
+                    <div className="max-w-3xl mx-auto text-center space-y-4 mb-16">
+                        <h2 className="text-3xl font-black text-slate-900 dark:text-slate-100">
+                            {t('platform.landing.features_title')}
                         </h2>
-                        <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
-                            تلتزم AQL Platform بأحدث المعايير المعمارية لتوفير بيئة عمل مستقرة لكل مؤسسة.
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                            {t('platform.landing.features_subtitle')}
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {/* Feature 1 */}
                         <div className="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 hover:border-blue-500/40 transition-all">
                             <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
                                 <Building2 className="w-6 h-6" />
                             </div>
                             <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                                عزل شامل للمؤسسات (Multi-Tenancy)
+                                {t('platform.landing.feature_1_title')}
                             </h3>
                             <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                                تحصل كل مؤسسة على بيئة تشغيل مستقلة مع قاعدة بيانات معزولة بنسبة 100% ونطاق فرعي مخصص لمنع أي تداخل في البيانات.
+                                {t('platform.landing.feature_1_desc')}
                             </p>
                         </div>
 
                         {/* Feature 2 */}
                         <div className="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 hover:border-indigo-500/40 transition-all">
                             <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-                                <Layers className="w-6 h-6" />
+                                <Globe className="w-6 h-6" />
                             </div>
                             <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                                موديولات أعمال قابلة للتركيب
+                                {t('platform.landing.feature_2_title')}
                             </h3>
                             <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                                معمارية قائمة على الموديولات المستقلة (Modular Architecture)، تتيح للمؤسسات تمكين التطبيقات والخدمات حسب الحاجة.
+                                {t('platform.landing.feature_2_desc')}
                             </p>
                         </div>
 
@@ -239,10 +195,10 @@ export default function Landing() {
                                 <ShieldCheck className="w-6 h-6" />
                             </div>
                             <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                                عزل الهوية والصلاحيات
+                                {t('platform.landing.feature_3_title')}
                             </h3>
                             <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                                فصل صارم بين هويات مدراء المنصة المركزية ومستخدمي المؤسسات التشغيلية، مع حوكمة دقيقة للصلاحيات والتدقيق (Audit Logs).
+                                {t('platform.landing.feature_3_desc')}
                             </p>
                         </div>
 
@@ -252,10 +208,10 @@ export default function Landing() {
                                 <Zap className="w-6 h-6" />
                             </div>
                             <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                                أداء فائق وتفاعل لحظي
+                                {t('platform.landing.feature_4_title')}
                             </h3>
                             <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                                مبنية باستخدام PHP 8.3 و Laravel 11 مع واجهات React 18 و Inertia.js v3 لتوفير سرعة استجابة فائقة بدون تعقيد SPAs.
+                                {t('platform.landing.feature_4_desc')}
                             </p>
                         </div>
 
@@ -265,10 +221,10 @@ export default function Landing() {
                                 <Globe className="w-6 h-6" />
                             </div>
                             <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                                إدارة النطاقات وتفعيل الحسابات
+                                {t('platform.landing.feature_5_title')}
                             </h3>
                             <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                                دورة حياة منظمة لطلب التسجيل، الموافقة، إرسال رابط التفعيل الفردي، ثم تجهيز قاعدة البيانات وتفعيل المستأجر.
+                                {t('platform.landing.feature_5_desc')}
                             </p>
                         </div>
 
@@ -278,10 +234,10 @@ export default function Landing() {
                                 <Server className="w-6 h-6" />
                             </div>
                             <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                                إدارة الحالات التشغيلية
+                                {t('platform.landing.feature_6_title')}
                             </h3>
                             <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                                دعم كامل للتحكم في حالة المؤسسات التشغيلية (نشطة، موقوفة مؤقتاً وضع القراءة فقط Read-Only، مؤرشفة، أو محذوفة).
+                                {t('platform.landing.feature_6_desc')}
                             </p>
                         </div>
                     </div>
@@ -293,25 +249,27 @@ export default function Landing() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="bg-gradient-to-br from-blue-900 to-slate-900 rounded-3xl p-8 sm:p-12 text-white shadow-2xl relative overflow-hidden">
                         <div className="max-w-2xl space-y-6">
-                            <span className="text-xs font-bold text-blue-400 uppercase tracking-widest block">البنية المعمارية المعتمدة</span>
+                            <span className="text-xs font-bold text-blue-400 uppercase tracking-widest block">
+                                {t('platform.landing.arch_badge')}
+                            </span>
                             <h2 className="text-2xl sm:text-4xl font-black">
-                                الالتزام بالعقود والقرارات المعمارية الموثقة
+                                {t('platform.landing.arch_title')}
                             </h2>
                             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                                تم بناء المنصة استناداً إلى أكثر من 24 قراراً معمارياً موثقاً (ADR) يضمن الفصل الحقيقي بين طلبات التسجيل، سجل المؤسسات المركزي، والبيئات التشغيلية المستقلة للمستأجرين.
+                                {t('platform.landing.arch_desc')}
                             </p>
                             <div className="pt-4 flex flex-wrap gap-4">
                                 <Link
                                     href="/onboarding"
                                     className="px-6 py-3 rounded-xl bg-white text-slate-900 font-bold text-xs hover:bg-slate-100 transition-all shadow-md"
                                 >
-                                    قدم طلب تسجيل مؤسستك الآن
+                                    {t('platform.landing.action_register')}
                                 </Link>
                                 <Link
                                     href="/changelog"
                                     className="px-6 py-3 rounded-xl bg-slate-800/80 text-white font-bold text-xs hover:bg-slate-800 transition-all border border-slate-700"
                                 >
-                                    تصفح سجل التحديثات الإداري
+                                    {t('platform.landing.action_changelog')}
                                 </Link>
                             </div>
                         </div>
@@ -327,19 +285,19 @@ export default function Landing() {
                             AQL
                         </div>
                         <span className="text-slate-600 dark:text-slate-400 font-semibold">
-                            جميع الحقوق محفوظة © 2026 AQL Platform
+                            {t('platform.landing.footer_rights')}
                         </span>
                     </div>
 
                     <div className="flex items-center gap-6 text-slate-500 dark:text-slate-400 font-semibold">
                         <Link href="/onboarding" className="hover:text-blue-600 dark:hover:text-blue-400">
-                            تسجيل جديد
+                            {t('platform.landing.footer_new_register')}
                         </Link>
                         <Link href="/login" className="hover:text-blue-600 dark:hover:text-blue-400">
-                            تسجيل الدخول
+                            {t('platform.landing.footer_login')}
                         </Link>
                         <Link href="/changelog" className="hover:text-blue-600 dark:hover:text-blue-400">
-                            سجل التحديثات
+                            {t('platform.landing.footer_changelog')}
                         </Link>
                     </div>
                 </div>

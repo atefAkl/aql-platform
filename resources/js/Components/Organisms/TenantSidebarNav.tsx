@@ -16,9 +16,12 @@ import {
     Globe, 
     LogOut,
     Sun,
-    Moon
+    Moon,
+    ChevronRight
 } from 'lucide-react';
 import { PageProps } from '../../types';
+import { useTranslation } from '../../Hooks/useTranslation';
+import LanguageSwitcher from '../Molecules/LanguageSwitcher';
 
 interface SubMenuItem {
     id: string;
@@ -43,18 +46,19 @@ interface SidebarNavProps {
 export const TenantSidebarNav: React.FC<SidebarNavProps> = ({ darkMode, setDarkMode }) => {
     const { url, props } = usePage<PageProps>();
     const authUser = props.auth?.user;
-    const organizationName = (props.auth as any)?.organization_name || 'لوحة تحكم المؤسسة';
+    const { t, locale } = useTranslation();
+    const organizationName = (props.auth as any)?.organization_name || t('tenant.sidebar.default_org_name');
 
     const navigationItems: MainMenuItem[] = [
         {
             id: 'users',
-            label: 'إدارة الموظفين والصلاحيات',
+            label: t('tenant.sidebar.nav.users'),
             icon: <Activity className="w-4 h-4 text-blue-500" />,
             href: '/users',
         },
         {
             id: 'audit',
-            label: 'سجل العمليات الحساسة',
+            label: t('tenant.sidebar.nav.audit'),
             icon: <ShieldCheck className="w-4 h-4 text-emerald-500" />,
             href: '/audit',
         },
@@ -82,7 +86,7 @@ export const TenantSidebarNav: React.FC<SidebarNavProps> = ({ darkMode, setDarkM
     };
 
     return (
-        <aside className="w-full md:w-64 bg-white dark:bg-slate-900 border-b md:border-b-0 md:border-l border-slate-200 dark:border-slate-800 p-4 flex flex-col justify-between shrink-0 shadow-sm" dir="rtl">
+        <aside className="w-full md:w-64 bg-white dark:bg-slate-900 border-b md:border-b-0 md:border-e border-slate-200 dark:border-slate-800 p-4 flex flex-col justify-between shrink-0 shadow-sm">
             <div>
                 {/* Brand Header */}
                 <div className="flex items-center gap-3 p-3 bg-slate-100 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 mb-6 shadow-sm">
@@ -91,7 +95,7 @@ export const TenantSidebarNav: React.FC<SidebarNavProps> = ({ darkMode, setDarkM
                     </div>
                     <div className="flex-1 min-w-0">
                         <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{organizationName}</h4>
-                        <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 block truncate">إدارة المؤسسة</span>
+                        <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 block truncate">{t('tenant.sidebar.org_management')}</span>
                     </div>
                 </div>
 
@@ -134,13 +138,13 @@ export const TenantSidebarNav: React.FC<SidebarNavProps> = ({ darkMode, setDarkM
                                         <span>{item.label}</span>
                                     </div>
                                     <div className="transition-transform duration-200">
-                                        {isOpen ? <ChevronDown className="w-4 h-4 opacity-70" /> : <ChevronLeft className="w-4 h-4 opacity-50" />}
+                                        {isOpen ? <ChevronDown className="w-4 h-4 opacity-70" /> : (locale === 'ar' ? <ChevronLeft className="w-4 h-4 opacity-50" /> : <ChevronRight className="w-4 h-4 opacity-50" />)}
                                     </div>
                                 </button>
 
                                 {/* Sub-menu Items */}
                                 {isOpen && hasChildren && (
-                                    <div className="mt-1 mr-4 space-y-1 pr-3 border-r-2 border-slate-200 dark:border-slate-800 py-1 animate-fade-in">
+                                    <div className="mt-1 ms-4 space-y-1 ps-3 border-s-2 border-slate-200 dark:border-slate-800 py-1 animate-fade-in">
                                         {item.children?.map((subItem) => {
                                             const isSubActive = url === subItem.href;
                                             return (
@@ -168,15 +172,17 @@ export const TenantSidebarNav: React.FC<SidebarNavProps> = ({ darkMode, setDarkM
 
             {/* Footer Actions & Theme Mode */}
             <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
+                <LanguageSwitcher />
+
                 <button
                     onClick={() => setDarkMode(!darkMode)}
                     className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:opacity-90 transition-all shadow-sm"
                 >
                     <span className="flex items-center gap-2">
                         {darkMode ? <Moon className="w-4 h-4 text-amber-400" /> : <Sun className="w-4 h-4 text-amber-500" />}
-                        {darkMode ? 'المظهر الداكن (Dark)' : 'المظهر الفاتح (Light)'}
+                        {darkMode ? t('tenant.sidebar.theme_dark') : t('tenant.sidebar.theme_light')}
                     </span>
-                    <span className="text-[10px] opacity-60">تغيير</span>
+                    <span className="text-[10px] opacity-60">{t('tenant.sidebar.theme_toggle')}</span>
                 </button>
 
                 {authUser && (
@@ -187,7 +193,7 @@ export const TenantSidebarNav: React.FC<SidebarNavProps> = ({ darkMode, setDarkM
                             </div>
                             <div className="min-w-0">
                                 <p className="text-xs font-bold truncate text-slate-800 dark:text-slate-200">{authUser.name}</p>
-                                <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">Super Admin</p>
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{t('tenant.sidebar.role_super_admin')}</p>
                             </div>
                         </div>
 
@@ -196,7 +202,7 @@ export const TenantSidebarNav: React.FC<SidebarNavProps> = ({ darkMode, setDarkM
                             method="post"
                             as="button"
                             className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                            title="تسجيل الخروج"
+                            title={t('tenant.sidebar.logout')}
                         >
                             <LogOut className="w-4 h-4" />
                         </Link>

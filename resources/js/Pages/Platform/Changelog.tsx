@@ -12,9 +12,10 @@ import {
     Sun, 
     Moon, 
     Calendar,
-    Tag,
-    ChevronLeft
+    ChevronLeft,
+    ChevronRight
 } from 'lucide-react';
+import { useTranslation } from '../../Hooks/useTranslation';
 
 export interface CategoryData {
     label: string;
@@ -44,6 +45,7 @@ interface ChangelogProps {
 }
 
 export default function Changelog({ releases = [], latestVersion = 'v0.4.0' }: ChangelogProps) {
+    const { t, locale } = useTranslation();
     const [darkMode, setDarkMode] = useState(false);
 
     useEffect(() => {
@@ -98,8 +100,8 @@ export default function Changelog({ releases = [], latestVersion = 'v0.4.0' }: C
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-200" dir="rtl">
-            <Head title="سجل إصدارات وتحديثات المنصة - Changelog" />
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 transition-colors duration-200">
+            <Head title={t('platform.changelog.title')} />
 
             {/* Public Header */}
             <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
@@ -110,8 +112,8 @@ export default function Changelog({ releases = [], latestVersion = 'v0.4.0' }: C
                                 AQL
                             </div>
                             <div className="flex flex-col">
-                                <span className="font-bold text-sm text-slate-900 dark:text-slate-100">منصة AQL Platform</span>
-                                <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold">سجل التحديثات والإصدارات الرسمية</span>
+                                <span className="font-bold text-sm text-slate-900 dark:text-slate-100">{t('platform.changelog.brand_name')}</span>
+                                <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold">{t('platform.changelog.brand_subtitle')}</span>
                             </div>
                         </Link>
                     </div>
@@ -121,7 +123,7 @@ export default function Changelog({ releases = [], latestVersion = 'v0.4.0' }: C
                             type="button"
                             onClick={toggleDarkMode}
                             className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:opacity-80 transition-all"
-                            title="تغيير المظهر"
+                            title={t('platform.changelog.theme_toggle')}
                         >
                             {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
                         </button>
@@ -130,8 +132,8 @@ export default function Changelog({ releases = [], latestVersion = 'v0.4.0' }: C
                             href="/onboarding"
                             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition-all shadow-sm"
                         >
-                            <span>التسجيل في المنصة</span>
-                            <ChevronLeft className="w-4 h-4" />
+                            <span>{t('platform.changelog.register')}</span>
+                            {locale === 'ar' ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                         </Link>
                     </div>
                 </div>
@@ -142,20 +144,20 @@ export default function Changelog({ releases = [], latestVersion = 'v0.4.0' }: C
                 {/* Hero Banner */}
                 <div className="p-6 sm:p-8 bg-gradient-to-r from-blue-600 via-indigo-600 to-teal-600 rounded-3xl text-white shadow-xl shadow-blue-500/10 space-y-4">
                     <div className="flex items-center gap-2">
-                        <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-mono font-bold tracking-wider dir-ltr inline-block">
+                        <span dir="ltr" className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-mono font-bold tracking-wider inline-block">
                             {latestVersion}
                         </span>
                         <span className="text-xs font-semibold bg-emerald-400/20 text-emerald-100 border border-emerald-400/30 px-2.5 py-0.5 rounded-full">
-                            أحدث إصدار مستقر
+                            {t('platform.changelog.latest_release')}
                         </span>
                     </div>
 
                     <h1 className="text-2xl sm:text-3xl font-black">
-                        سجل التحديثات والإصدارات (Release Changelog)
+                        {t('platform.changelog.header_title')}
                     </h1>
                     
                     <p className="text-sm sm:text-base text-blue-100 leading-relaxed max-w-3xl">
-                        توثيق رسمي وحي لجميع التحسينات، والتغييرات المعمارية، والموديولات الجديدة، والإصلاحات التي تم إطلاقها في منصة AQL Platform مع كل سبرنت تطويري.
+                        {t('platform.changelog.header_desc')}
                     </p>
                 </div>
 
@@ -178,7 +180,7 @@ export default function Changelog({ releases = [], latestVersion = 'v0.4.0' }: C
                                         </code>
                                         {idx === 0 && (
                                             <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold border border-emerald-500/20">
-                                                الإصدار الحالي
+                                                {t('platform.changelog.current_release')}
                                             </span>
                                         )}
                                     </div>
@@ -189,7 +191,7 @@ export default function Changelog({ releases = [], latestVersion = 'v0.4.0' }: C
 
                                 <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 shrink-0">
                                     <Calendar className="w-4 h-4 text-slate-400" />
-                                    <span>{new Date(release.date).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                                    <span>{new Date(release.date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                                 </div>
                             </div>
 
@@ -217,7 +219,7 @@ export default function Changelog({ releases = [], latestVersion = 'v0.4.0' }: C
                                                 </h3>
                                             </div>
 
-                                            <ul className="space-y-2 pr-6 border-r-2 border-slate-200 dark:border-slate-800">
+                                            <ul className="space-y-2 ps-6 border-s-2 border-slate-200 dark:border-slate-800">
                                                 {category.items.map((item, itemIdx) => (
                                                     <li key={itemIdx} className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed list-disc list-inside">
                                                         {item}
@@ -236,7 +238,7 @@ export default function Changelog({ releases = [], latestVersion = 'v0.4.0' }: C
             {/* Footer */}
             <footer className="mt-20 py-8 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400">
                 <div className="max-w-5xl mx-auto px-4">
-                    <p>© 2026 AQL Platform. جميع الحقوق محفوظة — بنية تحتية تكاملية قوية ومستقلة.</p>
+                    <p>{t('platform.changelog.footer_text').replace(':year', new Date().getFullYear().toString())}</p>
                 </div>
             </footer>
         </div>

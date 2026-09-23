@@ -21,6 +21,9 @@ import {
 } from 'lucide-react';
 import { PageProps } from '../../types';
 
+import { useTranslation } from '../../Hooks/useTranslation';
+import LanguageSwitcher from '../Molecules/LanguageSwitcher';
+
 interface SubMenuItem {
     id: string;
     label: string;
@@ -44,52 +47,53 @@ interface SidebarNavProps {
 export const SidebarNav: React.FC<SidebarNavProps> = ({ darkMode, setDarkMode }) => {
     const { url, props } = usePage<PageProps>();
     const authUser = props.auth?.user;
+    const { t, direction } = useTranslation();
 
-    const navigationItems: MainMenuItem[] = [
+        const navigationItems: MainMenuItem[] = [
         {
             id: 'landing',
-            label: 'الصفحة الرئيسية للموقع',
+            label: t('common.navigation.home'),
             icon: <Globe className="w-4 h-4 text-indigo-500" />,
             href: '/',
         },
         {
             id: 'dashboard',
-            label: 'لوحة التحكم المركزية',
+            label: t('platform.nav.dashboard'),
             icon: <LayoutDashboard className="w-4 h-4 text-blue-500" />,
             href: '/admin/dashboard',
         },
         {
             id: 'requests',
-            label: 'طلبات التسجيل',
+            label: t('platform.nav.requests'),
             icon: <FileText className="w-4 h-4 text-amber-500" />,
             href: '/admin/requests',
         },
         {
             id: 'tenants',
-            label: 'حسابات المؤسسات',
+            label: t('platform.nav.tenants'),
             icon: <Building2 className="w-4 h-4 text-emerald-500" />,
             children: [
                 {
                     id: 'all-tenants',
-                    label: 'كافة الحسابات',
+                    label: 'All Tenants',
                     href: '/admin/tenants',
                     icon: <Building2 className="w-3.5 h-3.5 text-slate-400" />,
                 },
                 {
                     id: 'active-tenants',
-                    label: 'حسابات نشطة',
+                    label: 'Active Tenants',
                     href: '/admin/tenants?status=active',
                     icon: <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />,
                 },
                 {
                     id: 'suspended-tenants',
-                    label: 'موقوفة مؤقتاً',
+                    label: 'Suspended Tenants',
                     href: '/admin/tenants?status=suspended',
                     icon: <Clock className="w-3.5 h-3.5 text-amber-500" />,
                 },
                 {
                     id: 'archived-tenants',
-                    label: 'حسابات مؤرشفة',
+                    label: 'Archived Tenants',
                     href: '/admin/tenants?status=archived',
                     icon: <Ban className="w-3.5 h-3.5 text-rose-500" />,
                 },
@@ -97,35 +101,28 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ darkMode, setDarkMode })
         },
         {
             id: 'modules',
-            label: 'إدارة الموديولات والخدمات',
+            label: t('platform.nav.modules'),
             icon: <Layers className="w-4 h-4 text-indigo-500" />,
             children: [
                 {
                     id: 'expenses-module',
-                    label: 'موديول المصروفات',
+                    label: 'Expenses Module',
                     href: '/admin/dashboard#modules',
                     icon: <Activity className="w-3.5 h-3.5 text-indigo-400" />,
                 },
                 {
                     id: 'permissions-catalog',
-                    label: 'الصلاحيات المركزية',
+                    label: 'Central Permissions',
                     href: '/admin/dashboard#permissions',
                     icon: <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />,
                 },
             ],
         },
         {
-            id: 'settings',
-            label: 'إعدادات المنصة',
-            icon: <Settings className="w-4 h-4 text-amber-500" />,
-            children: [
-                {
-                    id: 'domains-config',
-                    label: 'النطاقات المركزية',
-                    href: '/admin/dashboard#domains',
-                    icon: <Globe className="w-3.5 h-3.5 text-amber-400" />,
-                },
-            ],
+            id: 'changelog',
+            label: t('platform.nav.changelog'),
+            icon: <FileText className="w-4 h-4 text-amber-500" />,
+            href: '/changelog',
         },
     ];
 
@@ -151,7 +148,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ darkMode, setDarkMode })
     };
 
     return (
-        <aside className="w-full md:w-64 bg-white dark:bg-slate-900 border-b md:border-b-0 md:border-l border-slate-200 dark:border-slate-800 p-4 flex flex-col justify-between shrink-0 shadow-sm" dir="rtl">
+        <aside className="w-full md:w-64 bg-white dark:bg-slate-900 border-b md:border-b-0 md:border-e border-slate-200 dark:border-slate-800 p-4 flex flex-col justify-between shrink-0 shadow-sm">
             <div>
                 {/* Brand Header */}
                 <div className="flex items-center gap-3 p-3 bg-slate-100 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 mb-6 shadow-sm">
@@ -159,8 +156,8 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ darkMode, setDarkMode })
                         AQL
                     </div>
                     <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">منصة AQL Platform</h4>
-                        <span className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 block truncate">إدارة المنصة المركزية</span>
+                        <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{t('platform.brand.name')}</h4>
+                        <span className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 block truncate">{t('platform.brand.desc')}</span>
                     </div>
                 </div>
 
@@ -209,7 +206,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ darkMode, setDarkMode })
 
                                 {/* Sub-menu Items */}
                                 {isOpen && hasChildren && (
-                                    <div className="mt-1 mr-4 space-y-1 pr-3 border-r-2 border-slate-200 dark:border-slate-800 py-1 animate-fade-in">
+                                    <div className="mt-1 ms-4 space-y-1 ps-3 border-s-2 border-slate-200 dark:border-slate-800 py-1 animate-fade-in">
                                         {item.children?.map((subItem) => {
                                             const isSubActive = url === subItem.href;
                                             return (
@@ -237,15 +234,18 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ darkMode, setDarkMode })
 
             {/* Footer Actions & Theme Mode */}
             <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
+                
+                <LanguageSwitcher />
+
                 <button
                     onClick={() => setDarkMode(!darkMode)}
                     className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:opacity-90 transition-all shadow-sm"
                 >
                     <span className="flex items-center gap-2">
                         {darkMode ? <Moon className="w-4 h-4 text-amber-400" /> : <Sun className="w-4 h-4 text-amber-500" />}
-                        {darkMode ? 'المظهر الداكن (Dark)' : 'المظهر الفاتح (Light)'}
+                        {darkMode ? t('common.theme.dark') : t('common.theme.light')}
                     </span>
-                    <span className="text-[10px] opacity-60">تغيير</span>
+                    <span className="text-[10px] opacity-60">{t('common.actions.change')}</span>
                 </button>
 
                 {authUser && (
@@ -265,7 +265,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ darkMode, setDarkMode })
                             method="post"
                             as="button"
                             className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                            title="تسجيل الخروج"
+                            title={t('platform.nav.logout')}
                         >
                             <LogOut className="w-4 h-4" />
                         </Link>

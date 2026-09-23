@@ -40,7 +40,7 @@ export default function ActivateTenant({ token, organization_name, admin_email }
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-between transition-colors duration-200 font-sans" dir="rtl">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col justify-between transition-colors duration-200 font-sans">
             <Head title={`تفعيل حساب ${organization_name} - منصة عقل`} />
 
             {/* Top Navigation Bar */}
@@ -116,20 +116,20 @@ export default function ActivateTenant({ token, organization_name, admin_email }
                                 كلمة المرور الجديدة <span className="text-rose-500">*</span>
                             </label>
                             <div className="relative">
-                                <Lock className="w-4 h-4 text-slate-400 absolute right-3 top-3" />
+                                <Lock className="w-4 h-4 text-slate-400 absolute start-3 top-3" />
                                 <input
                                     type={showPassword ? 'text' : 'password'}
                                     required
                                     value={data.password}
                                     onChange={(e) => setData('password', e.target.value)}
                                     placeholder="••••••••"
-                                    className="w-full pr-9 pl-10 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    className="w-full ps-9 pe-10 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                     dir="ltr"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute left-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                                    className="absolute end-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                                 >
                                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>
@@ -142,20 +142,20 @@ export default function ActivateTenant({ token, organization_name, admin_email }
                                 تأكيد كلمة المرور <span className="text-rose-500">*</span>
                             </label>
                             <div className="relative">
-                                <Lock className="w-4 h-4 text-slate-400 absolute right-3 top-3" />
+                                <Lock className="w-4 h-4 text-slate-400 absolute start-3 top-3" />
                                 <input
                                     type={showConfirmPassword ? 'text' : 'password'}
                                     required
                                     value={data.password_confirmation}
                                     onChange={(e) => setData('password_confirmation', e.target.value)}
                                     placeholder="••••••••"
-                                    className="w-full pr-9 pl-10 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    className="w-full ps-9 pe-10 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                     dir="ltr"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                    className="absolute left-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                                    className="absolute end-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                                 >
                                     {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>

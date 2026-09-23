@@ -3,6 +3,7 @@ import TenantLayout from '../../Layouts/TenantLayout';
 import { useForm, router } from '@inertiajs/react';
 import { Users, UserPlus, Shield, Check, Save, UserCheck, Briefcase } from 'lucide-react';
 import { User as UserType } from '../../types';
+import { useTranslation } from '../../Hooks/useTranslation';
 
 interface RoleType {
     id: number;
@@ -25,6 +26,7 @@ interface UsersIndexProps {
 }
 
 export default function UsersIndex({ users, roles, permissions }: UsersIndexProps) {
+    const { t } = useTranslation();
     const [selectedUser, setSelectedUser] = useState<UsersIndexProps['users'][0] | null>(users[0] || null);
     const [selectedRoleId, setSelectedRoleId] = useState<number | string | null>(
         selectedUser ? selectedUser.role_id || null : null
@@ -83,7 +85,7 @@ export default function UsersIndex({ users, roles, permissions }: UsersIndexProp
     };
 
     return (
-        <TenantLayout title="إدارة الموظفين والأدوار والصلاحيات">
+        <TenantLayout title={t('tenant.users.title')}>
             <div className="space-y-6">
                 
                 {/* Header */}
@@ -91,9 +93,9 @@ export default function UsersIndex({ users, roles, permissions }: UsersIndexProp
                     <div>
                         <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                             <Users className="w-5 h-5 text-emerald-500" />
-                            إدارة الموظفين والأدوار والصلاحيات (Hybrid Role Model)
+                            {t('tenant.users.header')}
                         </h1>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">تطبيق ADR-003 & ADR-005: اختيار دور وظيفي رئيسي مع إمكانية التعيين والتعديل المباشر للصلاحيات الفردية</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{t('tenant.users.desc')}</p>
                     </div>
 
                     <button
@@ -101,7 +103,7 @@ export default function UsersIndex({ users, roles, permissions }: UsersIndexProp
                         className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow transition-all flex items-center justify-center gap-2"
                     >
                         <UserPlus className="w-4 h-4" />
-                        إضافة موظف جديد
+                        {t('tenant.users.add_employee')}
                     </button>
                 </div>
 
@@ -111,25 +113,25 @@ export default function UsersIndex({ users, roles, permissions }: UsersIndexProp
                         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4">
                             <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                                 <UserPlus className="w-5 h-5 text-emerald-500" />
-                                إضافة موظف جديد للفريق
+                                {t('tenant.users.add_employee_to_team')}
                             </h3>
 
                             <form onSubmit={handleCreateUser} className="space-y-4">
                                 <div>
-                                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">الاسم الكامل</label>
+                                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">{t('tenant.users.full_name')}</label>
                                     <input
                                         type="text"
                                         value={newUser.name}
                                         onChange={(e) => setNewUser('name', e.target.value)}
                                         className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
-                                        placeholder="سامي محمود"
+                                        placeholder={t('tenant.users.full_name_placeholder')}
                                         required
                                     />
                                     {errors.name && <span className="text-[11px] text-red-500 mt-1 block">{errors.name}</span>}
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">البريد الإلكتروني</label>
+                                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">{t('tenant.users.email')}</label>
                                     <input
                                         type="email"
                                         value={newUser.email}
@@ -142,7 +144,7 @@ export default function UsersIndex({ users, roles, permissions }: UsersIndexProp
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">كلمة المرور الأولية</label>
+                                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">{t('tenant.users.initial_password')}</label>
                                     <input
                                         type="password"
                                         value={newUser.password}
@@ -155,13 +157,13 @@ export default function UsersIndex({ users, roles, permissions }: UsersIndexProp
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">الدور الوظيفي الرئيسي (Role Template)</label>
+                                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">{t('tenant.users.role_template')}</label>
                                     <select
                                         value={newUser.role_id}
                                         onChange={(e) => setNewUser('role_id', e.target.value)}
                                         className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
                                     >
-                                        <option value="">بدون دور افتراضي (صلاحيات مخصصة فقط)</option>
+                                        <option value="">{t('tenant.users.no_default_role')}</option>
                                         {roles.map((r) => (
                                             <option key={r.id} value={r.id}>
                                                 {r.name} - ({r.description})
@@ -176,14 +178,14 @@ export default function UsersIndex({ users, roles, permissions }: UsersIndexProp
                                         onClick={() => setShowAddModal(false)}
                                         className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all"
                                     >
-                                        إلغاء
+                                        {t('tenant.users.cancel')}
                                     </button>
                                     <button
                                         type="submit"
                                         disabled={processing}
                                         className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow transition-all disabled:opacity-50"
                                     >
-                                        حفظ وإضافة الموظف
+                                        {t('tenant.users.save_add')}
                                     </button>
                                 </div>
                             </form>
@@ -196,7 +198,7 @@ export default function UsersIndex({ users, roles, permissions }: UsersIndexProp
                     {/* Team Users List */}
                     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 space-y-3 shadow-sm">
                         <h3 className="text-xs font-semibold text-slate-700 dark:text-slate-300 pb-2 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                            <span>فريق العمل الحالي ({users.length})</span>
+                            <span>{t('tenant.users.current_team')} ({users.length})</span>
                         </h3>
 
                         <div className="space-y-2">
@@ -218,11 +220,11 @@ export default function UsersIndex({ users, roles, permissions }: UsersIndexProp
                                             </div>
                                             <div className="min-w-0">
                                                 <p className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">{u.name}</p>
-                                                <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{u.role_title || u.role?.name || 'عضو فريق'}</p>
+                                                <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{u.role_title || u.role?.name || t('tenant.users.team_member')}</p>
                                             </div>
                                         </div>
                                         <span className="text-[10px] px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono">
-                                            {u.permissions.length} صلاحية
+                                            {u.permissions.length} {t('tenant.users.permission_count')}
                                         </span>
                                     </div>
                                 );
@@ -238,7 +240,7 @@ export default function UsersIndex({ users, roles, permissions }: UsersIndexProp
                                     <div>
                                         <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                                             <Shield className="w-4 h-4 text-emerald-500" />
-                                            إدارة الدور والصلاحيات للموظف: {selectedUser.name}
+                                            {t('tenant.users.manage_role_permissions')} {selectedUser.name}
                                         </h3>
                                         <span className="text-xs text-slate-500 dark:text-slate-400">{selectedUser.email}</span>
                                     </div>
@@ -248,7 +250,7 @@ export default function UsersIndex({ users, roles, permissions }: UsersIndexProp
                                         className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow transition-all flex items-center justify-center gap-2"
                                     >
                                         <Save className="w-4 h-4" />
-                                        حفظ التغييرات
+                                        {t('tenant.users.save_changes')}
                                     </button>
                                 </div>
 
@@ -256,14 +258,14 @@ export default function UsersIndex({ users, roles, permissions }: UsersIndexProp
                                 <div className="p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2">
                                     <label className="block text-xs font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
                                         <Briefcase className="w-4 h-4 text-emerald-500" />
-                                        الدور الوظيفي الرئيسي (Role Template):
+                                        {t('tenant.users.role_template_label')}
                                     </label>
                                     <select
                                         value={selectedRoleId || ''}
                                         onChange={(e) => handleRoleChange(e.target.value)}
                                         className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
                                     >
-                                        <option value="">بدون قالب دور (صلاحيات مخصصة بالكامل)</option>
+                                        <option value="">{t('tenant.users.no_role_template_full_custom')}</option>
                                         {roles.map((r) => (
                                             <option key={r.id} value={r.id}>
                                                 {r.name} - ({r.description})
@@ -271,7 +273,7 @@ export default function UsersIndex({ users, roles, permissions }: UsersIndexProp
                                         ))}
                                     </select>
                                     <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                                        اختيار دور محدد يقوم بتطبيق حزمة الصلاحيات التابعة له تلقائياً، مع احتفاظك بحرية استثناء أو إضافة صلاحيات صريحة بالأسفل (Direct Permissions Overrides).
+                                        {t('tenant.users.role_description')}
                                     </p>
                                 </div>
 
@@ -279,13 +281,13 @@ export default function UsersIndex({ users, roles, permissions }: UsersIndexProp
                                 <div className="space-y-5">
                                     <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                                         <UserCheck className="w-4 h-4 text-emerald-500" />
-                                        مصفوفة الصلاحيات الصريحة المباشرة (Direct Permissions Overrides):
+                                        {t('tenant.users.direct_permissions_matrix')}
                                     </h4>
 
                                     {Object.keys(permissions).map((moduleName) => (
                                         <div key={moduleName} className="space-y-2">
                                             <h5 className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-                                                موديول: {moduleName}
+                                                {t('tenant.users.module')} {moduleName}
                                             </h5>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                 {permissions[moduleName].map((p) => {
@@ -322,7 +324,7 @@ export default function UsersIndex({ users, roles, permissions }: UsersIndexProp
                                 </div>
                             </>
                         ) : (
-                            <div className="text-center py-12 text-slate-400 text-xs">اختر موظفاً من القائمة لتعديل دوره وصلاحياته المباشرة.</div>
+                            <div className="text-center py-12 text-slate-400 text-xs">{t('tenant.users.select_employee')}</div>
                         )}
                     </div>
                 </div>

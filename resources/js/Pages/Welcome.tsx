@@ -6,7 +6,7 @@ export default function Welcome() {
     const { auth } = usePage<any>().props;
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-200" dir="rtl">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-200">
             <Head title="مرحباً بك في AQL Platform" />
 
             {/* Top Navigation Bar */}

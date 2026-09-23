@@ -56,11 +56,11 @@ export default function TenantLayout({ children }: TenantLayoutProps) {
     }, [toast]);
 
     return (
-        <div className={`min-h-screen font-sans transition-colors duration-200 ${darkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`} dir="rtl">
+        <div className={`min-h-screen font-sans transition-colors duration-200 ${darkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
             
             {/* Top-Left Toast Notification System (ADR-005 - Opposite to RTL Right Sidebar) */}
             {toast && (
-                <div className="fixed top-4 left-4 z-50 max-w-md w-full animate-bounce-short">
+                <div className="fixed top-4 end-4 z-50 max-w-md w-full animate-bounce-short">
                     <div className={`p-4 rounded-2xl shadow-2xl border flex items-center justify-between gap-3 ${
                         toast.type === 'success' ? 'bg-emerald-950/90 text-emerald-200 border-emerald-500/40' :
                         toast.type === 'error' ? 'bg-rose-950/90 text-rose-200 border-rose-500/40' :
