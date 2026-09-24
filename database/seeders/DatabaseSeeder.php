@@ -19,11 +19,19 @@ class DatabaseSeeder extends Seeder
         $existing = Tenant::find($tenantId);
 
         if (! $existing) {
+            Tenant::withoutEvents(function () use ($tenantId) {
+                Tenant::create([
+                    'id' => $tenantId,
+                    'name' => 'شركة الأفق العالمية',
+                    'status' => 'active',
+                ]);
+            });
+
             $service = new TenantProvisioningService;
-            $centralDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
-            $service->createTenant(
+            $centralDomain = env('TENANT_BASE_DOMAIN') ?? preg_replace('/^(www\.|platform\.)/', '', parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost');
+
+            $service->provisionTenant(
                 $tenantId,
-                'شركة الأفق العالمية',
                 'الأدمن الرئيسي',
                 'admin@acme.com',
                 'password123',

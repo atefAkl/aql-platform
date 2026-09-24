@@ -25,8 +25,7 @@ class TenantProvisioningService
     public function provisionTenant(string $id, string $adminName, string $adminEmail, string $adminPassword, ?string $domain = null): array
     {
         $tenantId = Str::slug($id);
-        $centralDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
-        $centralDomain = preg_replace('/^www\./', '', $centralDomain);
+        $centralDomain = env('TENANT_BASE_DOMAIN') ?? preg_replace('/^(www\.|platform\.)/', '', parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost');
         $domainName = $domain ?? ($tenantId.'.'.$centralDomain);
 
         $tenant = Tenant::findOrFail($tenantId);

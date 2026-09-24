@@ -20,8 +20,7 @@ class OnboardingController extends Controller
      */
     public function create(): Response
     {
-        $centralDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
-        $centralDomain = preg_replace('/^www\./', '', $centralDomain);
+        $centralDomain = env('TENANT_BASE_DOMAIN') ?? preg_replace('/^(www\.|platform\.)/', '', parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost');
 
         return Inertia::render('Auth/Onboarding', [
             'central_domain' => $centralDomain,
@@ -63,8 +62,7 @@ class OnboardingController extends Controller
         ]);
 
         $slug = Str::slug($validated['slug']);
-        $centralDomain = parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
-        $centralDomain = preg_replace('/^www\./', '', $centralDomain);
+        $centralDomain = env('TENANT_BASE_DOMAIN') ?? preg_replace('/^(www\.|platform\.)/', '', parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost');
         $domainName = $slug.'.'.$centralDomain;
 
         // Additional uniqueness check for domain mapping

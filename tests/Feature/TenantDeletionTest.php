@@ -11,7 +11,7 @@ class TenantDeletionTest extends TestCase
 {
     public function test_platform_admin_can_delete_registration_request_and_linked_tenant()
     {
-        $admin = PlatformUser::factory()->create();
+        $admin = PlatformUser::factory()->create(['email' => 'delreq_admin_'.rand(10000, 99999).'@example.com']);
         $slug = 'delreq'.rand(1000, 9999);
 
         $request = RegistrationRequest::create([
@@ -40,7 +40,7 @@ class TenantDeletionTest extends TestCase
 
     public function test_platform_admin_can_delete_operational_tenant_account()
     {
-        $admin = PlatformUser::factory()->create();
+        $admin = PlatformUser::factory()->create(['email' => 'deltenant_admin_'.rand(10000, 99999).'@example.com']);
         $slug = 'deltenant'.rand(1000, 9999);
 
         Tenant::withoutEvents(function () use ($slug) {
