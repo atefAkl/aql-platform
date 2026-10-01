@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\OnboardingController;
 use App\Http\Controllers\Auth\UnifiedLoginController;
 use App\Http\Controllers\Platform\ChangelogController;
 use App\Http\Controllers\Platform\DashboardController;
+use App\Http\Controllers\Platform\PlanController;
 use App\Http\Controllers\Platform\RegistrationRequestController;
 use App\Http\Controllers\Platform\TenantLifecycleController;
 use App\Http\Controllers\Shared\LocaleController;
@@ -105,5 +106,10 @@ Route::prefix('admin')->group(function () {
         Route::post('/tenants/{tenant}/archive', [TenantLifecycleController::class, 'archive'])->name('platform.tenants.archive');
         Route::post('/tenants/{tenant}/restore', [TenantLifecycleController::class, 'restore'])->name('platform.tenants.restore');
         Route::delete('/tenants/{tenant}', [TenantLifecycleController::class, 'destroy'])->name('platform.tenants.destroy');
+
+        // Subscription Plan Management Routes
+        Route::get('/plans', [PlanController::class, 'index'])->name('platform.plans.index');
+        Route::post('/plans', [PlanController::class, 'store'])->name('platform.plans.store');
+        Route::put('/plans/{plan}', [PlanController::class, 'update'])->name('platform.plans.update');
     });
 });

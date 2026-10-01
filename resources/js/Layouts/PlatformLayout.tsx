@@ -1,21 +1,16 @@
 import React, { useState, useEffect, ReactNode } from 'react';
 import { usePage } from '@inertiajs/react';
-import { CheckCircle, AlertCircle, AlertTriangle, Info, X } from 'lucide-react';
 import { PageProps } from '../types';
 import { SidebarNav } from '../Components/Organisms/SidebarNav';
+import { ToastContainer } from '../Components/Molecules/ToastContainer';
 
 interface PlatformLayoutProps {
     children: ReactNode;
     title?: string;
 }
 
-interface ToastState {
-    type: 'success' | 'error' | 'warning' | 'info';
-    message: string;
-}
-
 export default function PlatformLayout({ children }: PlatformLayoutProps) {
-    const { flash, direction, locale } = usePage<PageProps>().props;
+    const { direction, locale } = usePage<PageProps>().props;
 
     // Theme Mode State (ADR-005)
     const [darkMode, setDarkMode] = useState<boolean>(() => {
@@ -24,9 +19,6 @@ export default function PlatformLayout({ children }: PlatformLayoutProps) {
         }
         return true;
     });
-
-    // Toast State
-    const [toast, setToast] = useState<ToastState | null>(null);
 
     useEffect(() => {
         if (darkMode) {
@@ -44,48 +36,11 @@ export default function PlatformLayout({ children }: PlatformLayoutProps) {
         document.documentElement.dir = (direction as string) || 'rtl';
     }, [locale, direction]);
 
-    // Auto trigger Toast on Flash message
-    useEffect(() => {
-        if (flash?.success) {
-            setToast({ type: 'success', message: flash.success });
-        } else if (flash?.error) {
-            setToast({ type: 'error', message: flash.error });
-        }
-    }, [flash]);
-
-    // Auto dismiss Toast after 5s
-    useEffect(() => {
-        if (toast) {
-            const timer = setTimeout(() => setToast(null), 5000);
-            return () => clearTimeout(timer);
-        }
-    }, [toast]);
-
     return (
-        <div className={`min-h-screen font-sans transition-colors duration-200 ${darkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`} dir={direction as string || 'rtl'}>
+        <div className={`min-h-screen font-sans transition-colors duration-200 ${darkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'}`} dir={(direction as string) || 'rtl'}>
             
-            {/* Top-Left Toast Notification System (ADR-005 - Opposite to RTL Right Sidebar) */}
-            {toast && (
-                <div className="fixed top-4 end-4 z-50 max-w-md w-full animate-bounce-short">
-                    <div className={`p-4 rounded-2xl shadow-2xl border flex items-center justify-between gap-3 ${
-                        toast.type === 'success' ? 'bg-emerald-950/90 text-emerald-200 border-emerald-500/40' :
-                        toast.type === 'error' ? 'bg-rose-950/90 text-rose-200 border-rose-500/40' :
-                        toast.type === 'warning' ? 'bg-amber-950/90 text-amber-200 border-amber-500/40' :
-                        'bg-blue-950/90 text-blue-200 border-blue-500/40'
-                    }`}>
-                        <div className="flex items-center gap-3">
-                            {toast.type === 'success' && <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />}
-                            {toast.type === 'error' && <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />}
-                            {toast.type === 'warning' && <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />}
-                            {toast.type === 'info' && <Info className="w-5 h-5 text-blue-400 shrink-0" />}
-                            <span className="text-xs font-semibold">{toast.message}</span>
-                        </div>
-                        <button onClick={() => setToast(null)} className="opacity-70 hover:opacity-100 transition-opacity p-1">
-                            <X className="w-4 h-4" />
-                        </button>
-                    </div>
-                </div>
-            )}
+            {/* Centralized Toast Notification System */}
+            <ToastContainer />
 
             <div className="flex flex-col md:flex-row min-h-screen">
                 {/* Organism Sidebar Component */}

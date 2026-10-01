@@ -61,7 +61,28 @@ class HandleInertiaRequests extends Middleware
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
+                'warning' => fn () => $request->session()->get('warning'),
+                'info' => fn () => $request->session()->get('info'),
             ],
+
+            'notifications' => function () use ($request) {
+                $notifications = $request->session()->get('notifications', []);
+
+                $types = ['success', 'error', 'warning', 'info'];
+                foreach ($types as $type) {
+                    $msg = $request->session()->get($type);
+                    if ($msg && ! collect($notifications)->contains('message', $msg)) {
+                        $notifications[] = [
+                            'id' => (string) str()->uuid(),
+                            'type' => $type,
+                            'message' => $msg,
+                            'timestamp' => now()->toISOString(),
+                        ];
+                    }
+                }
+
+                return $notifications;
+            },
 
             // Language & Localization
             'locale' => fn () => app()->getLocale(),

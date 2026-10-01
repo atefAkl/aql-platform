@@ -8,6 +8,7 @@ class TenantSubscription extends Model
 {
     protected $fillable = [
         'tenant_id',
+        'plan_id',
         'module_code',
         'status',
         'provisioning_state',
@@ -29,6 +30,11 @@ class TenantSubscription extends Model
     public function tenant()
     {
         return $this->belongsTo(Tenant::class);
+    }
+
+    public function plan()
+    {
+        return $this->belongsTo(Plan::class);
     }
 
     public function module()

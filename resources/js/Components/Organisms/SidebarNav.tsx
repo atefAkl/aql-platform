@@ -15,6 +15,7 @@ import {
     Activity, 
     Globe, 
     LogOut,
+    CreditCard,
     Sun,
     Moon,
     Home
@@ -61,6 +62,12 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ darkMode, setDarkMode })
             label: t('platform.nav.dashboard'),
             icon: <LayoutDashboard className="w-4 h-4 text-blue-500" />,
             href: '/admin/dashboard',
+        },
+        {
+            id: 'plans',
+            label: 'خطط الاشتراك',
+            icon: <CreditCard className="w-4 h-4 text-emerald-500" />,
+            href: '/admin/plans',
         },
         {
             id: 'requests',
