@@ -13,6 +13,7 @@
         "stancl/tenancy": "^3.10"
     },
     "require-dev": {
+        "aql/expenses-module": "@dev",
         "fakerphp/faker": "^1.23",
         "laravel/boost": "^2.9",
         "laravel/pail": "^1.2.5",
@@ -85,5 +86,14 @@
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../aql-expenses-module",
+            "options": {
+                "symlink": true
+            }
+        }
+    ]
 }

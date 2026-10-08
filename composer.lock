@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3d085c0bf203c44c69edf6cab85be217",
+    "content-hash": "a62105264d5e30cc984d1489ce2bce78",
     "packages": [
         {
             "name": "brick/math",
@@ -6449,6 +6449,32 @@
     ],
     "packages-dev": [
         {
+            "name": "aql/expenses-module",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "../aql-expenses-module",
+                "reference": "8c7e59e83ff9c4725b39cd219d07d7e9db15a16d"
+            },
+            "require": {
+                "php": "^8.3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Aql\\Expenses\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "AQL Platform - Expenses Management Standalone Module",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
             "name": "composer/semver",
             "version": "3.4.4",
             "source": {
@@ -9106,12 +9132,14 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "aql/expenses-module": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.3"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "plugin-api-version": "2.6.0"
 }
